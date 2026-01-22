@@ -1,9 +1,9 @@
 module Teamtailor
   class SyncService
-    RESOURCES = {
+    DEFAULT_RESOURCES = {
       "jobs" => "/jobs",
       "candidates" => "/candidates",
-      "applications" => "/applications",
+      "applications" => "/job-applications",
       "messages" => "/messages"
     }.freeze
 
@@ -13,7 +13,7 @@ module Teamtailor
     end
 
     def sync(resource, full_sync: false)
-      endpoint = RESOURCES.fetch(resource)
+      endpoint = resource_path(resource)
       state = TeamtailorSyncState.fetch(resource)
       last_synced_at = full_sync ? nil : state.last_synced_at
       max_seen_at = last_synced_at
@@ -24,46 +24,54 @@ module Teamtailor
         "sort" => "-updated-at"
       }
 
-      @client.paginate(endpoint, params: params) do |response|
-        included_index = Utils.index_included(response["included"])
-        data = response["data"] || []
+      begin
+        @client.paginate(endpoint, params: params) do |response|
+          included_index = Utils.index_included(response["included"])
+          data = response["data"] || []
 
-        stop = false
+          stop = false
 
-        data.each do |item|
-          attributes = item.fetch("attributes", {})
-          updated_at = Utils.parse_time(Utils.attr(attributes, "updated_at", "updated-at"))
+          data.each do |item|
+            attributes = item.fetch("attributes", {})
+            updated_at = Utils.parse_time(Utils.attr(attributes, "updated_at", "updated-at"))
 
-          if last_synced_at.present? && updated_at.present? && updated_at < last_synced_at
-            stop = true
-            next
+            if last_synced_at.present? && updated_at.present? && updated_at < last_synced_at
+              stop = true
+              next
+            end
+
+            processed += 1
+            max_seen_at = updated_at if updated_at.present? && (max_seen_at.blank? || updated_at > max_seen_at)
+
+            case resource
+            when "jobs"
+              Mappers::JobPostingMapper.upsert!(item)
+            when "candidates"
+              Mappers::CandidateMapper.upsert!(item)
+            when "applications"
+              Mappers::ApplicationMapper.upsert!(item, included_index: included_index)
+            when "messages"
+              application = resolve_message_application(item)
+              next if application.blank?
+
+              Mappers::MessageMapper.upsert!(item, application: application)
+            end
           end
 
-          processed += 1
-          max_seen_at = updated_at if updated_at.present? && (max_seen_at.blank? || updated_at > max_seen_at)
-
-          case resource
-          when "jobs"
-            Mappers::JobPostingMapper.upsert!(item)
-          when "candidates"
-            Mappers::CandidateMapper.upsert!(item)
-          when "applications"
-            Mappers::ApplicationMapper.upsert!(item, included_index: included_index)
-          when "messages"
-            application = resolve_message_application(item)
-            next if application.blank?
-
-            Mappers::MessageMapper.upsert!(item, application: application)
+          if stop
+            update_state(state, max_seen_at)
+            @logger.info("Teamtailor sync stopped early for #{resource} at #{max_seen_at}")
+            :stop
+          else
+            update_state(state, max_seen_at)
           end
         end
-
-        if stop
-          update_state(state, max_seen_at)
-          @logger.info("Teamtailor sync stopped early for #{resource} at #{max_seen_at}")
-          :stop
-        else
-          update_state(state, max_seen_at)
+      rescue RuntimeError => e
+        if e.message.include?("404")
+          @logger.warn("Teamtailor sync skipped for #{resource}: #{e.message}")
+          return 0
         end
+        raise
       end
 
       @logger.info("Teamtailor sync finished for #{resource}: #{processed} items")
@@ -78,6 +86,11 @@ module Teamtailor
 
     def update_state(state, max_seen_at)
       state.update!(last_synced_at: max_seen_at || Time.current)
+    end
+
+    def resource_path(resource)
+      env_key = "TEAMTAILOR_#{resource.upcase}_PATH"
+      ENV.fetch(env_key, DEFAULT_RESOURCES.fetch(resource))
     end
 
     def resolve_message_application(payload)

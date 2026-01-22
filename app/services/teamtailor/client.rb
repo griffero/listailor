@@ -76,6 +76,7 @@ module Teamtailor
       {
         "Authorization" => "Token token=#{@api_key}",
         "X-Api-Version" => @api_version,
+        "Accept" => "application/vnd.api+json",
         "Content-Type" => "application/json",
         "User-Agent" => USER_AGENT
       }
