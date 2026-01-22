@@ -143,8 +143,9 @@ function formatDate(dateStr) {
         </div>
         <div class="flex gap-3">
           <button
+            type="button"
             @click="showManagePanel = true"
-            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition cursor-pointer"
           >
             Manage Stages
           </button>
@@ -200,8 +201,7 @@ function formatDate(dateStr) {
     </div>
 
     <!-- Slide-over Panel -->
-    <Teleport to="body">
-      <div v-if="showManagePanel" class="fixed inset-0 z-50 overflow-hidden">
+    <div v-if="showManagePanel" class="fixed inset-0 z-50 overflow-hidden">
         <!-- Backdrop -->
         <div 
           class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
@@ -378,7 +378,7 @@ function formatDate(dateStr) {
           </div>
         </div>
       </div>
-    </Teleport>
+    </div>
   </AppLayout>
 </template>
 
