@@ -11,7 +11,7 @@ class User < ApplicationRecord
   def send_magic_link!
     regenerate_magic_login_token
     update!(magic_login_sent_at: Time.current)
-    AuthMailer.magic_link(self).deliver_later
+    AuthMailer.magic_link(self).deliver_now
   end
 
   def magic_link_valid?
