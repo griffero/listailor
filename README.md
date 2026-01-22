@@ -99,6 +99,13 @@ rails tailwindcss:build
 | `N8N_SEND_EMAIL_WEBHOOK_URL` | Webhook URL for sending emails | `https://n8n.example.com/webhook/...` |
 | `N8N_API_TOKEN` | Bearer token for API authentication | `your-secure-token` |
 
+### Teamtailor Sync
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `TEAMTAILOR_API_KEY` | API key for Teamtailor | `tt_live_xxx` |
+| `TEAMTAILOR_API_BASE_URL` | Optional base URL override | `https://api.teamtailor.com/v1` |
+
 ### Embed Configuration
 
 | Variable | Description | Example |
