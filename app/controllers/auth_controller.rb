@@ -22,9 +22,7 @@ class AuthController < ApplicationController
     end
 
     # Auto-create user if doesn't exist
-    user = User.find_or_create_by!(email: email) do |u|
-      u.name = email.split("@").first.titleize
-    end
+    user = User.find_or_create_by!(email: email)
 
     user.send_magic_link!
     flash[:notice] = "Check your email for the magic link!"
