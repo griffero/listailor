@@ -2,7 +2,7 @@ module Embed
   class BaseController < ApplicationController
     layout "embed"
 
-    skip_before_action :verify_authenticity_token, only: [:create]
+    skip_before_action :verify_authenticity_token
     before_action :set_iframe_headers
 
     private

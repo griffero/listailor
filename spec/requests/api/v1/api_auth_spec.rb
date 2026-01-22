@@ -6,6 +6,11 @@ RSpec.describe "API Authentication", type: :request do
 
   describe "bearer token authentication" do
     context "without token" do
+      before do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("N8N_API_TOKEN").and_return("valid-token")
+      end
+
       it "returns unauthorized" do
         post "/api/v1/application_events", params: {
           application_id: application.id,
@@ -19,6 +24,11 @@ RSpec.describe "API Authentication", type: :request do
     end
 
     context "with invalid token" do
+      before do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("N8N_API_TOKEN").and_return("valid-token")
+      end
+
       it "returns unauthorized" do
         post "/api/v1/application_events",
           params: { application_id: application.id, event_type: "note", message: "Test" },
