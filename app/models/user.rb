@@ -15,14 +15,14 @@ class User < ApplicationRecord
   end
 
   def magic_link_valid?
-    magic_login_token_digest.present? &&
+    magic_login_token.present? &&
       magic_login_sent_at.present? &&
       magic_login_sent_at > 15.minutes.ago
   end
 
   def consume_magic_link!
     update!(
-      magic_login_token_digest: nil,
+      magic_login_token: nil,
       magic_login_sent_at: nil,
       last_signed_in_at: Time.current
     )
