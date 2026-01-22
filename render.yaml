@@ -3,7 +3,6 @@
 
 databases:
   - name: listailor-db
-    plan: free
     databaseName: listailor_production
     user: listailor
 
@@ -12,7 +11,6 @@ services:
   - type: web
     name: listailor-web
     runtime: ruby
-    plan: free
     buildCommand: |
       bundle install
       npm install
