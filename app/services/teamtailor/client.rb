@@ -5,12 +5,18 @@ module Teamtailor
     include HTTParty
 
     DEFAULT_BASE_URL = "https://api.teamtailor.com/v1".freeze
+    DEFAULT_API_VERSION = "20240904".freeze
     USER_AGENT = "Listailor-ATS/1.0".freeze
     MAX_RETRIES = 5
 
-    def initialize(api_key: ENV["TEAMTAILOR_API_KEY"], base_url: ENV["TEAMTAILOR_API_BASE_URL"])
+    def initialize(
+      api_key: ENV["TEAMTAILOR_API_KEY"],
+      base_url: ENV["TEAMTAILOR_API_BASE_URL"],
+      api_version: ENV["TEAMTAILOR_API_VERSION"]
+    )
       @api_key = api_key
       @base_url = base_url.presence || DEFAULT_BASE_URL
+      @api_version = api_version.presence || DEFAULT_API_VERSION
       raise "TEAMTAILOR_API_KEY is missing" if @api_key.blank?
     end
 
@@ -57,7 +63,7 @@ module Teamtailor
         end
 
         response.parsed_response
-      rescue StandardError => e
+      rescue StandardError
         raise if retries >= MAX_RETRIES
 
         sleep retry_sleep(retries)
@@ -69,6 +75,7 @@ module Teamtailor
     def headers
       {
         "Authorization" => "Token token=#{@api_key}",
+        "X-Api-Version" => @api_version,
         "Content-Type" => "application/json",
         "User-Agent" => USER_AGENT
       }
