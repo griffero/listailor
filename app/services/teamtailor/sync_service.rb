@@ -3,7 +3,7 @@ module Teamtailor
     DEFAULT_RESOURCES = {
       "jobs" => "/jobs",
       "candidates" => "/candidates",
-      "applications" => "/job-applications",
+      "applications" => ["/job-applications", "/applications"],
       "messages" => "/messages"
     }.freeze
 
@@ -13,9 +13,38 @@ module Teamtailor
     end
 
     def sync(resource, full_sync: false)
-      endpoint = resource_path(resource)
       state = TeamtailorSyncState.fetch(resource)
       last_synced_at = full_sync ? nil : state.last_synced_at
+
+      resource_paths(resource).each do |endpoint|
+        result = sync_endpoint(endpoint, resource, state, last_synced_at)
+        return result unless result == :not_found
+      end
+
+      @logger.warn("Teamtailor sync skipped for #{resource}: all endpoints returned 404")
+      0
+    end
+
+    def backfill_all
+      DEFAULT_RESOURCES.keys.each { |resource| sync(resource, full_sync: true) }
+    end
+
+    private
+
+    def update_state(state, max_seen_at)
+      state.update!(last_synced_at: max_seen_at || Time.current)
+    end
+
+    def resource_paths(resource)
+      env_key = "TEAMTAILOR_#{resource.upcase}_PATH"
+      env_value = ENV[env_key]
+      return [env_value] if env_value.present?
+
+      value = DEFAULT_RESOURCES.fetch(resource)
+      value.is_a?(Array) ? value : [value]
+    end
+
+    def sync_endpoint(endpoint, resource, state, last_synced_at)
       max_seen_at = last_synced_at
       processed = 0
 
@@ -67,30 +96,12 @@ module Teamtailor
           end
         end
       rescue RuntimeError => e
-        if e.message.include?("404")
-          @logger.warn("Teamtailor sync skipped for #{resource}: #{e.message}")
-          return 0
-        end
+        return :not_found if e.message.include?("404")
         raise
       end
 
       @logger.info("Teamtailor sync finished for #{resource}: #{processed} items")
       processed
-    end
-
-    def backfill_all
-      RESOURCES.keys.each { |resource| sync(resource, full_sync: true) }
-    end
-
-    private
-
-    def update_state(state, max_seen_at)
-      state.update!(last_synced_at: max_seen_at || Time.current)
-    end
-
-    def resource_path(resource)
-      env_key = "TEAMTAILOR_#{resource.upcase}_PATH"
-      ENV.fetch(env_key, DEFAULT_RESOURCES.fetch(resource))
     end
 
     def resolve_message_application(payload)
