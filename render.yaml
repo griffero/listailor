@@ -3,7 +3,7 @@
 
 databases:
   - name: listailor-db
-    plan: starter
+    plan: free
     databaseName: listailor_production
     user: listailor
 
@@ -12,7 +12,7 @@ services:
   - type: web
     name: listailor-web
     runtime: ruby
-    plan: starter
+    plan: free
     buildCommand: |
       bundle install
       npm install
@@ -56,7 +56,7 @@ services:
   - type: worker
     name: listailor-worker
     runtime: ruby
-    plan: starter
+    plan: free
     buildCommand: bundle install
     startCommand: bundle exec rake solid_queue:start
     envVars:
