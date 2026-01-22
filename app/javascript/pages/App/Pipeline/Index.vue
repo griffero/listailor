@@ -378,7 +378,6 @@ function formatDate(dateStr) {
           </div>
         </div>
       </div>
-    </div>
   </AppLayout>
 </template>
 
