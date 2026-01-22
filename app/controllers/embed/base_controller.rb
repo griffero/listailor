@@ -2,7 +2,8 @@ module Embed
   class BaseController < ApplicationController
     layout "embed"
 
-    skip_before_action :verify_authenticity_token, only: [:create]
+    # Skip CSRF for POST requests since embed forms are used cross-origin
+    skip_before_action :verify_authenticity_token, if: -> { request.post? }
     before_action :set_iframe_headers
 
     private

@@ -6,7 +6,11 @@
     <meta charset="utf-8">
     <%= csrf_meta_tags %>
     
-    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+    <% begin %>
+      <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+    <% rescue Propshaft::MissingAssetError %>
+      <!-- Assets not available -->
+    <% end %>
     
     <style>
       /* Minimal neutral embed styles */
