@@ -7,6 +7,9 @@ module Teamtailor
       "messages" => "/messages"
     }.freeze
 
+    DEFAULT_INCLUDES = {
+      "applications" => "job,candidate,answers"
+    }.freeze
     def initialize(client: Client.new, logger: Rails.logger)
       @client = client
       @logger = logger
@@ -52,6 +55,8 @@ module Teamtailor
         "page[size]" => 100,
         "sort" => "-updated-at"
       }
+      include_param = includes_for(resource)
+      params["include"] = include_param if include_param.present?
 
       begin
         @client.paginate(endpoint, params: params) do |response|
@@ -102,6 +107,11 @@ module Teamtailor
 
       @logger.info("Teamtailor sync finished for #{resource}: #{processed} items")
       processed
+    end
+
+    def includes_for(resource)
+      env_key = "TEAMTAILOR_#{resource.upcase}_INCLUDE"
+      ENV.fetch(env_key, DEFAULT_INCLUDES[resource])
     end
 
     def resolve_message_application(payload)
