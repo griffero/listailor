@@ -1,0 +1,25 @@
+<div class="max-w-2xl mx-auto px-4 py-16">
+  <div class="text-center">
+    <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+      <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+    
+    <h1 class="text-2xl font-bold text-gray-900 mb-3">Application Submitted!</h1>
+    <p class="text-gray-600 mb-6">
+      Thank you for applying for <strong><%= @job.title %></strong>. 
+      We've received your application and will review it shortly.
+    </p>
+    
+    <p class="text-gray-500 text-sm">
+      You'll receive an email confirmation at your provided email address.
+    </p>
+
+    <div class="mt-8">
+      <a href="<%= embed_jobs_path %>" class="text-indigo-600 hover:text-indigo-800 font-medium">
+        View other open positions
+      </a>
+    </div>
+  </div>
+</div>

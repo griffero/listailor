@@ -1,0 +1,18 @@
+# PostgreSQL configuration for Listailor ATS
+
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: listailor_development
+
+test:
+  <<: *default
+  database: listailor_test
+
+production:
+  <<: *default
+  url: <%= ENV["DATABASE_URL"] %>

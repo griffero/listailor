@@ -1,0 +1,131 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="mb-6">
+    <a href="<%= embed_job_path(@job.slug) %>" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back to job details
+    </a>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h1 class="text-xl font-bold text-gray-900">Apply for <%= @job.title %></h1>
+      <p class="text-gray-600 text-sm mt-1">Fill out the form below to submit your application.</p>
+    </div>
+
+    <% if flash[:alert].present? %>
+      <div class="p-4 bg-red-50 border-b border-red-200">
+        <p class="text-red-700 text-sm"><%= flash[:alert] %></p>
+      </div>
+    <% end %>
+
+    <%= form_with model: @application, url: embed_job_apply_path(@job.slug), method: :post, local: true, html: { class: "p-6 space-y-6" } do |f| %>
+      <!-- Hidden UTM fields -->
+      <%= hidden_field_tag "application[utm_source]", params[:utm_source] %>
+      <%= hidden_field_tag "application[utm_medium]", params[:utm_medium] %>
+      <%= hidden_field_tag "application[utm_campaign]", params[:utm_campaign] %>
+      <%= hidden_field_tag "application[utm_term]", params[:utm_term] %>
+      <%= hidden_field_tag "application[utm_content]", params[:utm_content] %>
+
+      <!-- Personal Information -->
+      <fieldset>
+        <legend class="text-lg font-medium text-gray-900 mb-4">Personal Information</legend>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="application_first_name" class="block text-sm font-medium text-gray-700 mb-1">
+              First Name <span class="text-red-500">*</span>
+            </label>
+            <%= f.text_field :first_name, required: true, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+          </div>
+
+          <div>
+            <label for="application_last_name" class="block text-sm font-medium text-gray-700 mb-1">
+              Last Name <span class="text-red-500">*</span>
+            </label>
+            <%= f.text_field :last_name, required: true, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label for="application_email" class="block text-sm font-medium text-gray-700 mb-1">
+            Email <span class="text-red-500">*</span>
+          </label>
+          <%= f.email_field :email, required: true, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+        </div>
+
+        <div class="mt-4">
+          <label for="application_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <%= f.telephone_field :phone, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+        </div>
+
+        <div class="mt-4">
+          <label for="application_linkedin_url" class="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
+          <%= f.url_field :linkedin_url, placeholder: "https://linkedin.com/in/yourprofile", class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+        </div>
+      </fieldset>
+
+      <!-- CV Upload -->
+      <fieldset>
+        <legend class="text-lg font-medium text-gray-900 mb-4">Resume / CV</legend>
+        
+        <div>
+          <label for="application_cv" class="block text-sm font-medium text-gray-700 mb-1">
+            Upload your CV <span class="text-red-500">*</span>
+          </label>
+          <%= f.file_field :cv, required: true, accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document", class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" %>
+          <p class="text-xs text-gray-500 mt-1">Accepted formats: PDF, DOC, DOCX (max 10MB)</p>
+        </div>
+      </fieldset>
+
+      <!-- Source -->
+      <fieldset>
+        <legend class="text-lg font-medium text-gray-900 mb-4">How did you hear about us?</legend>
+        
+        <div>
+          <%= f.text_field :source, placeholder: "e.g., LinkedIn, Referral, Job Board", class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+        </div>
+      </fieldset>
+
+      <!-- Custom Questions -->
+      <% if @questions.any? %>
+        <fieldset>
+          <legend class="text-lg font-medium text-gray-900 mb-4">Additional Questions</legend>
+          
+          <div class="space-y-4">
+            <% @questions.each do |question| %>
+              <div>
+                <label for="application_answers_<%= question.id %>" class="block text-sm font-medium text-gray-700 mb-1">
+                  <%= question.label %>
+                  <% if question.required? %><span class="text-red-500">*</span><% end %>
+                </label>
+
+                <% case question.kind %>
+                <% when "long_text" %>
+                  <%= text_area_tag "application[answers][#{question.id}]", params.dig(:application, :answers, question.id.to_s), required: question.required?, rows: 4, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+                <% when "short_text" %>
+                  <%= text_field_tag "application[answers][#{question.id}]", params.dig(:application, :answers, question.id.to_s), required: question.required?, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+                <% when "number" %>
+                  <%= number_field_tag "application[answers][#{question.id}]", params.dig(:application, :answers, question.id.to_s), required: question.required?, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+                <% when "checkbox" %>
+                  <div class="flex items-center">
+                    <%= check_box_tag "application[answers][#{question.id}]", "true", params.dig(:application, :answers, question.id.to_s) == "true", class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+                    <label class="ml-2 text-sm text-gray-600">Yes</label>
+                  </div>
+                <% when "select" %>
+                  <%= select_tag "application[answers][#{question.id}]", options_for_select([["Select an option", ""]] + question.select_options.map { |o| [o, o] }, params.dig(:application, :answers, question.id.to_s)), required: question.required?, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </fieldset>
+      <% end %>
+
+      <!-- Submit -->
+      <div class="pt-4">
+        <%= f.submit "Submit Application", class: "w-full px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

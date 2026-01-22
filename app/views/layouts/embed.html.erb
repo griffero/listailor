@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Jobs" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <%= csrf_meta_tags %>
+    
+    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+    
+    <style>
+      /* Minimal neutral embed styles */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+    </style>
+  </head>
+
+  <body class="bg-white antialiased">
+    <div class="min-h-screen">
+      <%= yield %>
+    </div>
+    
+    <script>
+      // Post message iframe height to parent
+      function postHeight() {
+        const height = document.body.scrollHeight;
+        window.parent.postMessage({ type: 'resize', height: height }, '*');
+      }
+      
+      window.addEventListener('load', postHeight);
+      window.addEventListener('resize', postHeight);
+      
+      // Also post on DOM changes
+      const observer = new MutationObserver(postHeight);
+      observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+  </body>
+</html>
