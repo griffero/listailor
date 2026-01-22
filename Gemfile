@@ -40,6 +40,9 @@ gem "thruster", require: false
 # HTTP client for webhook calls
 gem "httparty"
 
+# Resend for email delivery (HTTP API, bypasses SMTP blocking)
+gem "resend"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

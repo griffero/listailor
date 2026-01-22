@@ -274,6 +274,8 @@ GEM
     regexp_parser (2.11.3)
     reline (0.6.3)
       io-console (~> 0.5)
+    resend (1.0.0)
+      httparty (>= 0.21.0)
     rexml (3.4.4)
     rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
@@ -423,6 +425,7 @@ DEPENDENCIES
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.4)
+  resend
   rspec-rails
   rubocop-rails-omakase
   shoulda-matchers
