@@ -14,15 +14,20 @@ class AuthController < ApplicationController
       return
     end
 
-    user = User.find_by(email: email)
-
-    if user
-      user.send_magic_link!
-      flash[:notice] = "Check your email for the magic link!"
-    else
-      # Don't reveal if user exists or not
-      flash[:notice] = "If an account exists with that email, you'll receive a magic link shortly."
+    # Only allow @fintoc.com emails
+    unless email.end_with?("@fintoc.com")
+      flash[:alert] = "Only @fintoc.com emails are allowed"
+      redirect_to login_path
+      return
     end
+
+    # Auto-create user if doesn't exist
+    user = User.find_or_create_by!(email: email) do |u|
+      u.name = email.split("@").first.titleize
+    end
+
+    user.send_magic_link!
+    flash[:notice] = "Check your email for the magic link!"
 
     redirect_to login_path
   end
