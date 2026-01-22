@@ -50,17 +50,19 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # ActionMailer configuration - Resend SMTP
+  # ActionMailer configuration - Resend SMTP (port 465 for SSL)
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost") }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address: "smtp.resend.com",
-    port: 587,
+    port: 465,
     user_name: "resend",
     password: ENV["RESEND_API_KEY"],
     authentication: :plain,
-    enable_starttls_auto: true
+    ssl: true,
+    open_timeout: 10,
+    read_timeout: 10
   }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
