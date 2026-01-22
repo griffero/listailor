@@ -29,9 +29,7 @@ defineProps({
       <div class="bg-indigo-50 rounded-lg p-4">
         <h3 class="text-sm font-medium text-indigo-800 mb-2">Available Variables</h3>
         <div class="flex flex-wrap gap-2">
-          <code v-for="v in variables" :key="v" class="px-2 py-1 bg-white rounded text-xs text-indigo-700">
-            {{ "{{" + v + "}}" }}
-          </code>
+          <code v-for="v in variables" :key="v" class="px-2 py-1 bg-white rounded text-xs text-indigo-700" v-text="'{{' + v + '}}'"></code>
         </div>
       </div>
 

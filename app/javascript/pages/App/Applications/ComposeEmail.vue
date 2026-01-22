@@ -85,11 +85,11 @@ function send() {
         <div class="bg-gray-50 rounded-lg p-4 text-sm">
           <h4 class="font-medium text-gray-700 mb-2">Available Variables</h4>
           <div class="grid grid-cols-2 gap-2 text-gray-600">
-            <code>{{ "{{candidate.first_name}}" }}</code>
-            <code>{{ "{{candidate.last_name}}" }}</code>
-            <code>{{ "{{job.title}}" }}</code>
-            <code>{{ "{{stage.name}}" }}</code>
-            <code>{{ "{{application.url}}" }}</code>
+            <code v-text="'{{candidate.first_name}}'"></code>
+            <code v-text="'{{candidate.last_name}}'"></code>
+            <code v-text="'{{job.title}}'"></code>
+            <code v-text="'{{stage.name}}'"></code>
+            <code v-text="'{{application.url}}'"></code>
           </div>
         </div>
 
