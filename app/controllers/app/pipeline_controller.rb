@@ -17,6 +17,7 @@ module App
         name: stage.name,
         kind: stage.kind,
         position: stage.position,
+        applicationCount: stage.applications.size,
         applications: stage.applications.recent.limit(100).map { |app| serialize_application(app) }
       }
     end
