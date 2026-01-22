@@ -13,7 +13,8 @@ services:
     runtime: ruby
     buildCommand: |
       bundle install
-      npm install
+      rm -rf node_modules
+      npm ci
       bundle exec rails assets:precompile
       bundle exec rails db:migrate
     startCommand: bundle exec puma -C config/puma.rb
