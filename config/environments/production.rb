@@ -48,6 +48,7 @@ Rails.application.configure do
 
   # Use Solid Queue for background jobs (DB-backed, same database)
   config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # ActionMailer configuration - Resend SMTP
   config.action_mailer.raise_delivery_errors = true
