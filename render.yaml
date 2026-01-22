@@ -26,6 +26,8 @@ services:
           property: connectionString
       - key: RAILS_ENV
         value: production
+      - key: NODE_VERSION
+        value: "20.11.1"
       - key: RAILS_MASTER_KEY
         sync: false
       - key: SECRET_KEY_BASE
