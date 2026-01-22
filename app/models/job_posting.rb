@@ -11,6 +11,8 @@ class JobPosting < ApplicationRecord
   scope :published, -> { where.not(published_at: nil) }
   scope :draft, -> { where(published_at: nil) }
   scope :ordered, -> { order(created_at: :desc) }
+  scope :active, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
 
   def published?
     published_at.present?
@@ -26,6 +28,18 @@ class JobPosting < ApplicationRecord
 
   def toggle_publish!
     published? ? unpublish! : publish!
+  end
+
+  def archived?
+    archived_at.present?
+  end
+
+  def archive!
+    update!(archived_at: Time.current, published_at: nil)
+  end
+
+  def unarchive!
+    update!(archived_at: nil)
   end
 
   private

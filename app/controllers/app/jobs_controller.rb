@@ -1,9 +1,9 @@
 module App
   class JobsController < BaseController
-    before_action :set_job, only: [:show, :edit, :update, :destroy, :publish, :unpublish]
+    before_action :set_job, only: [:show, :edit, :update, :destroy, :publish, :unpublish, :archive, :unarchive]
 
     def index
-      @jobs = JobPosting.ordered
+      @jobs = JobPosting.active.ordered
 
       render inertia: "App/Jobs/Index", props: {
         jobs: @jobs.map { |job| serialize_job(job) }
@@ -20,7 +20,9 @@ module App
 
     def new
       render inertia: "App/Jobs/Form", props: {
-        job: nil
+        job: nil,
+        departments: Setting.departments,
+        locations: Setting.locations
       }
     end
 
@@ -37,7 +39,9 @@ module App
     def edit
       render inertia: "App/Jobs/Form", props: {
         job: serialize_job_full(@job),
-        questions: @job.job_questions.ordered.map { |q| serialize_question(q) }
+        questions: @job.job_questions.ordered.map { |q| serialize_question(q) },
+        departments: Setting.departments,
+        locations: Setting.locations
       }
     end
 
@@ -68,6 +72,16 @@ module App
       redirect_to app_job_path(@job), notice: "Job unpublished"
     end
 
+    def archive
+      @job.archive!
+      redirect_to app_jobs_path, notice: "Job archived"
+    end
+
+    def unarchive
+      @job.unarchive!
+      redirect_to app_job_path(@job), notice: "Job unarchived"
+    end
+
     private
 
     def set_job
@@ -87,6 +101,8 @@ module App
         location: job.location,
         published: job.published?,
         publishedAt: job.published_at&.iso8601,
+        archived: job.archived?,
+        archivedAt: job.archived_at&.iso8601,
         applicationsCount: job.applications.count,
         createdAt: job.created_at.iso8601
       }

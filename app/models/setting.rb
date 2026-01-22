@@ -6,6 +6,8 @@ class Setting < ApplicationRecord
     outbound_webhook_url
     n8n_send_email_webhook_url
     embed_allowed_origins
+    departments
+    locations
   ].freeze
 
   def self.get(key)
@@ -29,5 +31,29 @@ class Setting < ApplicationRecord
   def self.embed_allowed_origins
     origins = get("embed_allowed_origins") || ENV["EMBED_ALLOWED_ORIGINS"] || ""
     origins.split(",").map(&:strip).reject(&:blank?)
+  end
+
+  def self.departments
+    json_value = get("departments")
+    return [] if json_value.blank?
+    JSON.parse(json_value)
+  rescue JSON::ParserError
+    []
+  end
+
+  def self.departments=(list)
+    set("departments", list.to_json)
+  end
+
+  def self.locations
+    json_value = get("locations")
+    return [] if json_value.blank?
+    JSON.parse(json_value)
+  rescue JSON::ParserError
+    []
+  end
+
+  def self.locations=(list)
+    set("locations", list.to_json)
   end
 end

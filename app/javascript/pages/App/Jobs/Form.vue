@@ -6,6 +6,8 @@ import AppLayout from '@/layouts/AppLayout.vue'
 const props = defineProps({
   job: Object,
   questions: Array,
+  departments: Array,
+  locations: Array,
   currentUser: Object
 })
 
@@ -103,19 +105,29 @@ function removeQuestion(id) {
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
-            <input 
+            <select 
               v-model="form.department"
-              type="text"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
+              <option value="">Select department...</option>
+              <option v-for="dept in departments" :key="dept" :value="dept">{{ dept }}</option>
+            </select>
+            <p v-if="!departments || departments.length === 0" class="text-xs text-gray-500 mt-1">
+              Configure departments in Settings
+            </p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-            <input 
+            <select 
               v-model="form.location"
-              type="text"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
+              <option value="">Select location...</option>
+              <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
+            </select>
+            <p v-if="!locations || locations.length === 0" class="text-xs text-gray-500 mt-1">
+              Configure locations in Settings
+            </p>
           </div>
         </div>
 

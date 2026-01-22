@@ -15,6 +15,12 @@ function togglePublish() {
     : `/app/jobs/${props.job.id}/publish`
   router.post(url)
 }
+
+function archiveJob() {
+  if (confirm('Are you sure you want to archive this job? It will be unpublished and hidden from the list.')) {
+    router.post(`/app/jobs/${props.job.id}/archive`)
+  }
+}
 </script>
 
 <template>
@@ -47,6 +53,12 @@ function togglePublish() {
           >
             Edit
           </Link>
+          <button 
+            @click="archiveJob"
+            class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+          >
+            Archive
+          </button>
         </div>
       </div>
 

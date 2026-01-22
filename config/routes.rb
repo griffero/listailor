@@ -38,6 +38,8 @@ Rails.application.routes.draw do
       member do
         post :publish
         post :unpublish
+        post :archive
+        post :unarchive
       end
       resources :questions, only: [:create, :update, :destroy]
     end
@@ -65,6 +67,9 @@ Rails.application.routes.draw do
     # Settings
     get "settings", to: "settings#index"
     patch "settings", to: "settings#update"
+
+    # Global Questions
+    resources :global_questions, only: [:create, :update, :destroy]
 
     # Reports
     get "reports", to: "reports#index"

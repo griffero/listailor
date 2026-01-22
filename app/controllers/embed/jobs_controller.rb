@@ -11,10 +11,12 @@ module Embed
 
     def apply
       @application = Application.new
+      @global_questions = GlobalQuestion.ordered
       @questions = @job.job_questions.ordered
     end
 
     def create_application
+      @global_questions = GlobalQuestion.ordered
       @questions = @job.job_questions.ordered
 
       # Find or create candidate (dedup by email)
@@ -50,11 +52,21 @@ module Embed
         @application.cv.attach(application_params[:cv])
       end
 
-      # Build answers
+      # Build answers for job questions
       if application_params[:answers].present?
         application_params[:answers].each do |question_id, value|
           @application.application_answers.build(
             job_question_id: question_id,
+            value: value
+          )
+        end
+      end
+
+      # Build answers for global questions
+      if application_params[:global_answers].present?
+        application_params[:global_answers].each do |question_id, value|
+          @application.application_answers.build(
+            global_question_id: question_id,
             value: value
           )
         end
@@ -87,7 +99,8 @@ module Embed
         :first_name, :last_name, :email, :phone, :linkedin_url,
         :source, :utm_source, :utm_medium, :utm_campaign, :utm_term, :utm_content,
         :cv,
-        answers: {}
+        answers: {},
+        global_answers: {}
       )
     end
   end
