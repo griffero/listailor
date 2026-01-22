@@ -15,7 +15,7 @@ services:
       bundle install
       rm -rf node_modules
       npm ci
-      RAILS_ENV=production bundle exec rails assets:precompile
+      RAILS_ENV=production VITE_RUBY_SKIP_COMPATIBILITY_CHECK=true bundle exec rails assets:precompile
       bundle exec rails db:migrate
     startCommand: bundle exec puma -C config/puma.rb
     healthCheckPath: /up
