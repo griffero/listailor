@@ -49,15 +49,15 @@ Rails.application.configure do
   # Use Solid Queue for background jobs (DB-backed, same database)
   config.active_job.queue_adapter = :solid_queue
 
-  # ActionMailer configuration via ENV
+  # ActionMailer configuration - Resend SMTP
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost") }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: ENV.fetch("SMTP_ADDRESS", "smtp.sendgrid.net"),
-    port: ENV.fetch("SMTP_PORT", 587).to_i,
-    user_name: ENV.fetch("SMTP_USERNAME", "apikey"),
-    password: ENV["SMTP_PASSWORD"],
+    address: "smtp.resend.com",
+    port: 587,
+    user_name: "resend",
+    password: ENV["RESEND_API_KEY"],
     authentication: :plain,
     enable_starttls_auto: true
   }
