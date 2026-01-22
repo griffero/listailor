@@ -15,6 +15,7 @@
   },
   "production": {
     "autoBuild": false,
-    "skipCompatibilityCheck": true
+    "skipCompatibilityCheck": true,
+    "publicOutputDir": "vite"
   }
 }
