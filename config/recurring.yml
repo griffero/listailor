@@ -16,4 +16,4 @@ production:
   teamtailor_sync:
     class: TeamtailorSyncJob
     queue: default
-    schedule: every 10 minutes
+    schedule: every 30 seconds
