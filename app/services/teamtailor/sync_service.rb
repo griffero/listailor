@@ -52,9 +52,10 @@ module Teamtailor
       processed = 0
 
       params = {
-        "page[size]" => 100,
-        "sort" => "-updated-at"
+        "page[size]" => page_size_for(resource)
       }
+      sort_param = sort_for(resource)
+      params["sort"] = sort_param if sort_param.present?
       include_param = includes_for(resource)
       params["include"] = include_param if include_param.present?
 
@@ -69,7 +70,7 @@ module Teamtailor
             attributes = item.fetch("attributes", {})
             updated_at = Utils.parse_time(Utils.attr(attributes, "updated_at", "updated-at"))
 
-            if last_synced_at.present? && updated_at.present? && updated_at < last_synced_at
+            if sort_param.present? && last_synced_at.present? && updated_at.present? && updated_at < last_synced_at
               stop = true
               next
             end
@@ -112,6 +113,19 @@ module Teamtailor
     def includes_for(resource)
       env_key = "TEAMTAILOR_#{resource.upcase}_INCLUDE"
       ENV.fetch(env_key, DEFAULT_INCLUDES[resource])
+    end
+
+    def sort_for(resource)
+      env_key = "TEAMTAILOR_#{resource.upcase}_SORT"
+      ENV.fetch(env_key, nil)
+    end
+
+    def page_size_for(resource)
+      env_key = "TEAMTAILOR_#{resource.upcase}_PAGE_SIZE"
+      env_value = ENV[env_key].presence
+      return env_value.to_i if env_value.present?
+
+      ENV.fetch("TEAMTAILOR_PAGE_SIZE", "1").to_i
     end
 
     def resolve_message_application(payload)
