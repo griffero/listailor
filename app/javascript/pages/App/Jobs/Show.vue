@@ -69,7 +69,7 @@ function archiveJob() {
           <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
             <div
-              class="prose prose-sm max-w-none text-gray-700 prose-p:my-3 prose-ul:my-4 prose-li:my-1 prose-headings:mt-6"
+              class="prose prose-sm max-w-none text-gray-700 prose-p:my-4 prose-ul:my-5 prose-ol:my-5 prose-li:my-1.5 prose-headings:mt-8 prose-headings:mb-3"
               v-html="job.description"
             ></div>
           </div>
