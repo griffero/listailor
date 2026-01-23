@@ -68,7 +68,10 @@ function archiveJob() {
           <!-- Description -->
           <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
-            <div class="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{{ job.description }}</div>
+            <div
+              class="prose prose-sm max-w-none text-gray-700 prose-p:my-3 prose-ul:my-4 prose-li:my-1 prose-headings:mt-6"
+              v-html="job.description"
+            ></div>
           </div>
 
           <!-- Questions -->
