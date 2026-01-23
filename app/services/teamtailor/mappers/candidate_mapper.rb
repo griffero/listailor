@@ -4,7 +4,21 @@ module Teamtailor
       def self.upsert!(payload)
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
-        candidate = Candidate.find_or_initialize_by(teamtailor_id: teamtailor_id)
+        email = Utils.attr(attributes, "email", "email-address")
+
+        candidate = Candidate.find_by(teamtailor_id: teamtailor_id)
+        if candidate.blank? && email.present?
+          candidate = Candidate.find_by(email: email)
+          if candidate&.teamtailor_id.present? && candidate.teamtailor_id != teamtailor_id
+            Rails.logger.warn(
+              "Teamtailor candidate email #{email} already linked to #{candidate.teamtailor_id}, skipping id #{teamtailor_id}"
+            )
+            return candidate
+          end
+        end
+
+        candidate ||= Candidate.new
+        candidate.teamtailor_id ||= teamtailor_id
 
         first_name = Utils.attr(attributes, "first_name", "first-name", "given-name")
         last_name = Utils.attr(attributes, "last_name", "last-name", "family-name")
@@ -18,7 +32,14 @@ module Teamtailor
 
         candidate.first_name = first_name if first_name.present?
         candidate.last_name = last_name if last_name.present?
-        candidate.email = Utils.attr(attributes, "email", "email-address") || candidate.email
+        if email.present?
+          email_conflict = Candidate.where(email: email).where.not(id: candidate.id).exists?
+          if email_conflict
+            Rails.logger.warn("Teamtailor candidate email conflict for #{email}; keeping existing email")
+          else
+            candidate.email = email
+          end
+        end
         candidate.phone = Utils.attr(attributes, "phone", "phone-number") || candidate.phone
         candidate.linkedin_url = Utils.attr(attributes, "linkedin", "linkedin_url", "linkedin-url") || candidate.linkedin_url
 
