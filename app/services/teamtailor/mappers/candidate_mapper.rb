@@ -47,7 +47,13 @@ module Teamtailor
         candidate.last_name ||= "Candidate"
         candidate.email ||= "unknown-#{teamtailor_id}@teamtailor.invalid"
 
-        candidate.save!
+        begin
+          candidate.save!
+        rescue ActiveRecord::RecordInvalid => e
+          Rails.logger.warn(
+            "Teamtailor candidate #{teamtailor_id} skipped: #{e.message}"
+          )
+        end
         candidate
       end
     end
