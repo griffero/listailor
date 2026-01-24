@@ -1,6 +1,7 @@
 module Teamtailor
   class SyncService
     DEFAULT_RESOURCES = {
+      "stages" => "/stages",
       "jobs" => "/jobs",
       "candidates" => "/candidates",
       "applications" => ["/job-applications", "/applications"],
@@ -8,7 +9,8 @@ module Teamtailor
     }.freeze
 
     DEFAULT_INCLUDES = {
-      "applications" => "job,candidate"
+      "applications" => "job,candidate,stage",
+      "jobs" => "questions"
     }.freeze
     def initialize(client: Client.new, logger: Rails.logger)
       @client = client
@@ -79,12 +81,14 @@ module Teamtailor
             max_seen_at = updated_at if updated_at.present? && (max_seen_at.blank? || updated_at > max_seen_at)
 
             case resource
+            when "stages"
+              Mappers::StageMapper.upsert!(item)
             when "jobs"
-              Mappers::JobPostingMapper.upsert!(item)
+              Mappers::JobPostingMapper.upsert!(item, included_index: included_index)
             when "candidates"
               Mappers::CandidateMapper.upsert!(item)
             when "applications"
-              Mappers::ApplicationMapper.upsert!(item, included_index: included_index)
+              Mappers::ApplicationMapper.upsert!(item, included_index: included_index, client: @client)
             when "messages"
               application = resolve_message_application(item)
               next if application.blank?

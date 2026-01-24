@@ -134,7 +134,8 @@ module App
             value: answer.value
           }
         end,
-        emails: app.email_messages.ordered.map { |email| serialize_email(email) },
+        emails: app.email_messages.order(Arel.sql("COALESCE(sent_at, received_at, created_at) ASC"))
+          .map { |email| serialize_email(email) },
         interviews: app.interview_events.ordered.map { |interview| serialize_interview(interview) }
       )
     end

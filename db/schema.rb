@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_22_160000) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_24_002938) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -93,10 +93,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_22_160000) do
     t.string "utm_content"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "teamtailor_id"
     t.index ["candidate_id"], name: "index_applications_on_candidate_id"
     t.index ["current_stage_id"], name: "index_applications_on_current_stage_id"
     t.index ["job_posting_id", "candidate_id"], name: "index_applications_on_job_posting_id_and_candidate_id", unique: true
     t.index ["job_posting_id"], name: "index_applications_on_job_posting_id"
+    t.index ["teamtailor_id"], name: "index_applications_on_teamtailor_id", unique: true
   end
 
   create_table "candidates", force: :cascade do |t|
@@ -107,7 +109,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_22_160000) do
     t.string "linkedin_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "teamtailor_id"
     t.index "lower((email)::text)", name: "index_candidates_on_lower_email", unique: true
+    t.index ["teamtailor_id"], name: "index_candidates_on_teamtailor_id", unique: true
   end
 
   create_table "email_messages", force: :cascade do |t|
@@ -123,7 +127,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_22_160000) do
     t.datetime "received_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "teamtailor_id"
     t.index ["application_id"], name: "index_email_messages_on_application_id"
+    t.index ["teamtailor_id"], name: "index_email_messages_on_teamtailor_id", unique: true
   end
 
   create_table "email_templates", force: :cascade do |t|
@@ -169,8 +175,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_22_160000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "archived_at"
+    t.string "teamtailor_id"
     t.index ["archived_at"], name: "index_job_postings_on_archived_at"
     t.index ["slug"], name: "index_job_postings_on_slug", unique: true
+    t.index ["teamtailor_id"], name: "index_job_postings_on_teamtailor_id", unique: true
   end
 
   create_table "job_questions", force: :cascade do |t|
@@ -182,7 +190,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_22_160000) do
     t.jsonb "options"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "teamtailor_id"
     t.index ["job_posting_id"], name: "index_job_questions_on_job_posting_id"
+    t.index ["teamtailor_id"], name: "index_job_questions_on_teamtailor_id", unique: true
   end
 
   create_table "pipeline_stages", force: :cascade do |t|
@@ -191,8 +201,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_22_160000) do
     t.string "kind", default: "active", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "teamtailor_id"
     t.index ["kind"], name: "index_pipeline_stages_on_kind"
     t.index ["position"], name: "index_pipeline_stages_on_position"
+    t.index ["teamtailor_id"], name: "index_pipeline_stages_on_teamtailor_id", unique: true
   end
 
   create_table "settings", force: :cascade do |t|
@@ -343,6 +355,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_22_160000) do
     t.index ["expires_at"], name: "index_solid_queue_semaphores_on_expires_at"
     t.index ["key", "value"], name: "index_solid_queue_semaphores_on_key_and_value"
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
+  end
+
+  create_table "teamtailor_sync_states", force: :cascade do |t|
+    t.string "resource", null: false
+    t.string "cursor"
+    t.datetime "last_synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["resource"], name: "index_teamtailor_sync_states_on_resource", unique: true
   end
 
   create_table "users", force: :cascade do |t|

@@ -52,6 +52,11 @@ function getKindBadgeClass(kind) {
   }
 }
 
+function formatCount(count, threshold = 100) {
+  if (count > threshold) return `+${threshold}`
+  return String(count)
+}
+
 // Stage management functions
 function startEdit(stage) {
   editingStageId.value = stage.id
@@ -171,7 +176,9 @@ function formatDate(dateStr) {
             <div class="p-3 border-b border-gray-200">
               <div class="flex justify-between items-center">
                 <h3 class="font-semibold text-gray-900">{{ stage.name }}</h3>
-                <span class="text-sm text-gray-500">{{ stage.applications.length }}</span>
+                <span class="text-sm text-gray-500">
+                  {{ formatCount(stage.applicationCount || 0) }}
+                </span>
               </div>
             </div>
             

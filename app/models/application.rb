@@ -60,6 +60,32 @@ class Application < ApplicationRecord
     end
   end
 
+  def sync_stage!(new_stage, occurred_at: Time.current)
+    return if new_stage.blank?
+
+    old_stage = current_stage
+    if old_stage&.id == new_stage.id
+      return if stage_transitions.where(to_stage: new_stage).exists?
+
+      stage_transitions.create!(
+        from_stage: nil,
+        to_stage: new_stage,
+        transitioned_at: occurred_at
+      )
+      return
+    end
+
+    transaction do
+      update!(current_stage: new_stage) if current_stage_id != new_stage.id
+
+      stage_transitions.create!(
+        from_stage: old_stage,
+        to_stage: new_stage,
+        transitioned_at: occurred_at
+      )
+    end
+  end
+
   def timeline_items
     items = []
 
@@ -117,6 +143,8 @@ class Application < ApplicationRecord
   private
 
   def set_initial_stage
+    return if current_stage_id.present?
+
     initial_stage = PipelineStage.ordered.first
     return unless initial_stage
 

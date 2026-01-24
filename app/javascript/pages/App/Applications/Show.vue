@@ -57,6 +57,10 @@ function getTimelineIcon(type) {
     default: return '•'
   }
 }
+
+function formatDirection(direction) {
+  return direction === 'inbound' ? 'Inbound' : 'Outbound'
+}
 </script>
 
 <template>
@@ -117,6 +121,34 @@ function getTimelineIcon(type) {
               <div v-if="timeline.length === 0" class="text-gray-500 text-center py-4">
                 No timeline events yet
               </div>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Messages</h2>
+            <div v-if="application.emails && application.emails.length > 0" class="space-y-4">
+              <div v-for="email in application.emails" :key="email.id" class="border border-gray-100 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-sm font-medium text-gray-700">
+                    {{ formatDirection(email.direction) }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    {{ formatDate(email.sentAt || email.receivedAt) }}
+                  </div>
+                </div>
+                <div class="text-sm text-gray-600 mb-1">
+                  <span class="font-medium text-gray-700">From:</span> {{ email.from }}
+                </div>
+                <div class="text-sm text-gray-600 mb-3">
+                  <span class="font-medium text-gray-700">To:</span> {{ email.to }}
+                </div>
+                <div class="font-medium text-gray-900 mb-2">{{ email.subject }}</div>
+                <div class="text-sm text-gray-700 whitespace-pre-wrap" v-html="email.body"></div>
+              </div>
+            </div>
+            <div v-else class="text-gray-500 text-center py-4">
+              No messages yet
             </div>
           </div>
 

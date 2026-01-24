@@ -8,6 +8,7 @@ class PipelineStage < ApplicationRecord
   validates :name, presence: true
   validates :position, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :kind, presence: true, inclusion: { in: KINDS }
+  validates :teamtailor_id, uniqueness: true, allow_nil: true
 
   scope :ordered, -> { order(position: :asc) }
   scope :active, -> { where(kind: "active") }
