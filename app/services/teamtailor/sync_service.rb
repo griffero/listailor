@@ -129,7 +129,7 @@ module Teamtailor
       env_value = ENV[env_key].presence
       return env_value.to_i if env_value.present?
 
-      ENV.fetch("TEAMTAILOR_PAGE_SIZE", "1").to_i
+      ENV.fetch("TEAMTAILOR_PAGE_SIZE", "25").to_i
     end
 
     def resolve_message_application(payload)
