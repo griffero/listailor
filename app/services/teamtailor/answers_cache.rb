@@ -20,7 +20,7 @@ module Teamtailor
       @client.paginate("/answers", params: {
         "filter[question]" => question_id,
         "include" => "candidate",
-        "page[size]" => 50
+        "page[size]" => 25
       }) do |response|
         (response["data"] || []).each do |answer|
           candidate_id = answer.dig("relationships", "candidate", "data", "id")

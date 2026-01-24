@@ -196,7 +196,7 @@ module Teamtailor
         endpoints.each do |endpoint|
           begin
             responses = []
-            client.paginate(endpoint, params: { "page[size]" => 50 }) do |response|
+            client.paginate(endpoint, params: { "page[size]" => 25 }) do |response|
               responses << response
             end
             answers = responses.flat_map { |resp| resp["data"] || [] }

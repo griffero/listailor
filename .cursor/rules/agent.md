@@ -12,7 +12,6 @@
 - Report what you checked and what improved each loop.
 
 ## Git and deploy policy
-- Never push unless the user explicitly asks you to push.
 - If the user asks to push, push to `main` by default unless they specify another branch.
 - Never force-push. Never bypass hooks unless explicitly requested.
 
