@@ -7,6 +7,7 @@ class JobQuestion < ApplicationRecord
   validates :label, presence: true
   validates :kind, presence: true, inclusion: { in: KINDS }
   validates :position, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :teamtailor_id, uniqueness: { scope: :job_posting_id }, allow_nil: true
 
   scope :ordered, -> { order(position: :asc) }
 

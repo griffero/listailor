@@ -5,8 +5,11 @@ module Teamtailor
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
 
-        question = JobQuestion.find_or_initialize_by(teamtailor_id: teamtailor_id)
-        question.job_posting = job_posting if job_posting.present?
+        if job_posting.present?
+          question = JobQuestion.find_or_initialize_by(job_posting: job_posting, teamtailor_id: teamtailor_id)
+        else
+          question = JobQuestion.find_or_initialize_by(teamtailor_id: teamtailor_id)
+        end
         question.label = Utils.attr(attributes, "label", "question", "title") || question.label
         question.kind = map_kind(Utils.attr(attributes, "type", "kind", "question_type"))
         question.required = Utils.attr(attributes, "required") unless Utils.attr(attributes, "required").nil?
