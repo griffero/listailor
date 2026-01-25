@@ -61,6 +61,14 @@ function getTimelineIcon(type) {
 function formatDirection(direction) {
   return direction === 'inbound' ? 'Inbound' : 'Outbound'
 }
+
+function answerLink(value) {
+  if (!value || typeof value !== 'string') return null
+  const trimmed = value.trim()
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  if (/^www\./i.test(trimmed)) return `https://${trimmed}`
+  return null
+}
 </script>
 
 <template>
@@ -178,7 +186,18 @@ function formatDirection(direction) {
             <div class="space-y-4">
               <div v-for="answer in application.answers" :key="answer.question" class="border-b border-gray-100 pb-4 last:border-0">
                 <div class="font-medium text-gray-700">{{ answer.question }}</div>
-                <div class="text-gray-600 mt-1 whitespace-pre-wrap">{{ answer.value || '—' }}</div>
+                <div class="text-gray-600 mt-1 whitespace-pre-wrap">
+                  <a
+                    v-if="answerLink(answer.value)"
+                    :href="answerLink(answer.value)"
+                    target="_blank"
+                    rel="noopener"
+                    class="text-indigo-600 hover:text-indigo-800 underline"
+                  >
+                    {{ answer.value }}
+                  </a>
+                  <span v-else>{{ answer.value || '—' }}</span>
+                </div>
               </div>
             </div>
           </div>

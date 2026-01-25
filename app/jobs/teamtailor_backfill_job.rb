@@ -8,12 +8,7 @@ class TeamtailorBackfillJob < ApplicationJob
   def perform
     return unless acquire_lock("backfill")
 
-    service = Teamtailor::SyncService.new
-
-    service.sync("jobs", full_sync: true)
-    service.sync("candidates", full_sync: true)
-    service.sync("applications", full_sync: true)
-    service.sync("messages", full_sync: true)
+    Teamtailor::SyncService.new.backfill_all
   ensure
     release_lock
   end

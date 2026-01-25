@@ -17,3 +17,7 @@ production:
     class: TeamtailorSyncJob
     queue: default
     schedule: every 30 seconds
+  teamtailor_backfill:
+    class: TeamtailorBackfillJob
+    queue: default
+    schedule: at 3am every day

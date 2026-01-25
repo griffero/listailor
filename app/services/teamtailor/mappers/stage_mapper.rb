@@ -73,6 +73,21 @@ module Teamtailor
 
         "active"
       end
+
+    def self.prune_missing!(teamtailor_ids)
+      ids = Array(teamtailor_ids).compact.uniq
+      scope = PipelineStage.where(teamtailor_id: nil)
+      scope = scope.or(PipelineStage.where.not(teamtailor_id: ids)) if ids.any?
+
+      return if scope.none?
+
+      stage_ids = scope.pluck(:id)
+
+      Application.where(current_stage_id: stage_ids).update_all(current_stage_id: nil)
+      ApplicationStageTransition.where(from_stage_id: stage_ids).delete_all
+      ApplicationStageTransition.where(to_stage_id: stage_ids).delete_all
+      PipelineStage.where(id: stage_ids).delete_all
+    end
     end
   end
 end

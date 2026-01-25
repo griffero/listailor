@@ -22,7 +22,7 @@ module Teamtailor
       last_synced_at = full_sync ? nil : state.last_synced_at
 
       resource_paths(resource).each do |endpoint|
-        result = sync_endpoint(endpoint, resource, state, last_synced_at)
+        result = sync_endpoint(endpoint, resource, state, last_synced_at, full_sync: full_sync)
         return result unless result == :not_found
       end
 
@@ -49,9 +49,10 @@ module Teamtailor
       value.is_a?(Array) ? value : [value]
     end
 
-    def sync_endpoint(endpoint, resource, state, last_synced_at)
+    def sync_endpoint(endpoint, resource, state, last_synced_at, full_sync: false)
       max_seen_at = last_synced_at
       processed = 0
+      seen_stage_ids = []
 
       params = {
         "page[size]" => page_size_for(resource)
@@ -82,7 +83,8 @@ module Teamtailor
 
             case resource
             when "stages"
-              Mappers::StageMapper.upsert!(item)
+              stage = Mappers::StageMapper.upsert!(item)
+              seen_stage_ids << stage.teamtailor_id if stage&.teamtailor_id.present?
             when "jobs"
               Mappers::JobPostingMapper.upsert!(item, included_index: included_index)
             when "candidates"
@@ -108,6 +110,10 @@ module Teamtailor
       rescue RuntimeError => e
         return :not_found if e.message.include?("404")
         raise
+      end
+
+      if resource == "stages" && full_sync
+        Mappers::StageMapper.prune_missing!(seen_stage_ids)
       end
 
       @logger.info("Teamtailor sync finished for #{resource}: #{processed} items")
