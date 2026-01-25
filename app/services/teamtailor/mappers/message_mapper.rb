@@ -2,6 +2,8 @@ module Teamtailor
   module Mappers
     class MessageMapper
       def self.upsert!(payload, application:)
+        return nil unless payload.is_a?(Hash)
+
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
 

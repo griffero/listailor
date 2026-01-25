@@ -2,6 +2,8 @@ module Teamtailor
   module Mappers
     class QuestionMapper
       def self.upsert_job_question!(payload, job_posting:, position: nil)
+        return nil unless payload.is_a?(Hash)
+
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
 

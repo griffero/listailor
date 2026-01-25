@@ -2,6 +2,8 @@ module Teamtailor
   module Mappers
     class CandidateMapper
       def self.upsert!(payload)
+        return nil unless payload.is_a?(Hash)
+
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
         email = Utils.attr(attributes, "email", "email-address")

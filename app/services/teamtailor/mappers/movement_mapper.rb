@@ -2,6 +2,8 @@ module Teamtailor
   module Mappers
     class MovementMapper
       def self.upsert!(payload)
+        return nil unless payload.is_a?(Hash)
+
         attributes = payload.fetch("attributes", {})
         # Resolve application
         app_ref = payload.dig("relationships", "job-application", "data")
