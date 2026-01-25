@@ -5,6 +5,7 @@ module Teamtailor
       "jobs" => ["/jobs", "/jobs?filter[status]=archived"],
       "candidates" => "/candidates",
       "applications" => ["/job-applications", "/applications"],
+      "movements" => "/movements",
       "messages" => "/messages"
     }.freeze
 
@@ -92,6 +93,8 @@ module Teamtailor
             when "applications"
               skip_answers = ENV["TEAMTAILOR_SKIP_ANSWERS"] == "true"
               Mappers::ApplicationMapper.upsert!(item, included_index: included_index, client: @client, skip_answers: skip_answers)
+            when "movements"
+              Mappers::MovementMapper.upsert!(item)
             when "messages"
               application = resolve_message_application(item)
               next if application.blank?
