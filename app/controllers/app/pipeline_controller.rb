@@ -6,7 +6,7 @@ module App
 
       render inertia: "App/Pipeline/Index", props: {
         stages: @stages.map { |stage| serialize_stage_with_applications(stage, @job_filter) },
-        jobs: JobPosting.published.ordered.map { |job| { id: job.id, title: job.title } },
+        jobs: JobPosting.where.not(teamtailor_id: nil).ordered.map { |job| { id: job.id, title: job.title } },
         selectedJobId: @job_filter
       }
     end
