@@ -73,7 +73,7 @@ module Teamtailor
             attributes = item.fetch("attributes", {})
             updated_at = Utils.parse_time(Utils.attr(attributes, "updated_at", "updated-at"))
 
-            if sort_param.present? && last_synced_at.present? && updated_at.present? && updated_at < last_synced_at
+            if !full_sync && sort_param.present? && last_synced_at.present? && updated_at.present? && updated_at < last_synced_at
               stop = true
               next
             end
