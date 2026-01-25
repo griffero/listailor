@@ -29,11 +29,12 @@ module Teamtailor
         stage_refs = payload.dig("relationships", "stages", "data")
         return unless stage_refs.is_a?(Array)
 
-        stage_refs.each do |stage_ref|
+        stage_refs.each_with_index do |stage_ref, index|
           stage_payload = Utils.find_included(included_index, stage_ref["type"], stage_ref["id"])
           next if stage_payload.blank?
 
-          StageMapper.upsert!(stage_payload, job_posting: job)
+          stage = StageMapper.upsert!(stage_payload, job_posting: job)
+          stage.update_column(:position, index) if stage.position != index
         end
       end
 
