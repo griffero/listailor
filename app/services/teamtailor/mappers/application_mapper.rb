@@ -86,6 +86,8 @@ module Teamtailor
       end
 
       def self.extract_answers(payload, included_index)
+        return [] unless payload.is_a?(Hash)
+
         attributes = payload.fetch("attributes", {})
         return attributes["answers"] if attributes["answers"].is_a?(Array)
 
@@ -99,6 +101,8 @@ module Teamtailor
       end
 
       def self.extract_answer_value(answer_payload)
+        return nil unless answer_payload.is_a?(Hash)
+
         attributes = answer_payload.fetch("attributes", {})
         value = Utils.attr(attributes, "value", "answer", "response", "text")
         value = attributes["boolean"] if value.nil?
