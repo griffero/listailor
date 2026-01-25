@@ -3,7 +3,8 @@ class TeamtailorDesyncCheckJob < ApplicationJob
 
   retry_on StandardError, wait: :polynomially_longer, attempts: 5
 
-  LOCK_KEY = 972_654_323
+  LOCK_KEY = "teamtailor_desync_check"
+  LOCK_TTL = 10.minutes
   BATCH_SIZE = 200
 
   def perform
@@ -50,21 +51,22 @@ class TeamtailorDesyncCheckJob < ApplicationJob
   private
 
   def acquire_lock
-    @lock_acquired = ActiveModel::Type::Boolean.new.cast(
-      ActiveRecord::Base.connection.select_value("SELECT pg_try_advisory_lock(#{LOCK_KEY})")
-    )
+    owner = "desync-check-#{Process.pid}"
+    @lock_owner = owner
+    @lock_key = LOCK_KEY
 
-    return true if @lock_acquired
+    acquired = Teamtailor::SyncLock.acquire(@lock_key, owner: owner, ttl: LOCK_TTL)
+    return true if acquired
 
     Rails.logger.info("TeamtailorDesyncCheckJob skipped: lock held")
     false
   end
 
   def release_lock
-    return unless @lock_acquired
+    return if @lock_owner.blank?
 
-    ActiveRecord::Base.connection.select_value("SELECT pg_advisory_unlock(#{LOCK_KEY})")
+    Teamtailor::SyncLock.release(@lock_key, owner: @lock_owner)
   ensure
-    @lock_acquired = false
+    @lock_owner = nil
   end
 end

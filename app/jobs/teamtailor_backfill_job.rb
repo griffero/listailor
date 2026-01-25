@@ -3,7 +3,8 @@ class TeamtailorBackfillJob < ApplicationJob
 
   retry_on StandardError, wait: :polynomially_longer, attempts: 10
 
-  LOCK_KEY = 972_654_321
+  LOCK_KEY = "teamtailor_backfill"
+  LOCK_TTL = 6.hours
 
   def perform
     return unless acquire_lock("backfill")
@@ -16,21 +17,22 @@ class TeamtailorBackfillJob < ApplicationJob
   private
 
   def acquire_lock(label)
-    @lock_acquired = ActiveModel::Type::Boolean.new.cast(
-      ActiveRecord::Base.connection.select_value("SELECT pg_try_advisory_lock(#{LOCK_KEY})")
-    )
+    owner = "#{label}-#{Process.pid}"
+    @lock_owner = owner
+    @lock_key = LOCK_KEY
 
-    return true if @lock_acquired
+    acquired = Teamtailor::SyncLock.acquire(@lock_key, owner: owner, ttl: LOCK_TTL)
+    return true if acquired
 
     Rails.logger.info("Teamtailor #{label} skipped: lock held")
     false
   end
 
   def release_lock
-    return unless @lock_acquired
+    return if @lock_owner.blank?
 
-    ActiveRecord::Base.connection.select_value("SELECT pg_advisory_unlock(#{LOCK_KEY})")
+    Teamtailor::SyncLock.release(@lock_key, owner: @lock_owner)
   ensure
-    @lock_acquired = false
+    @lock_owner = nil
   end
 end
