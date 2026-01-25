@@ -2,6 +2,8 @@ module Teamtailor
   module Mappers
     class ApplicationMapper
       def self.upsert!(payload, included_index: {}, client: Client.new, skip_answers: false)
+        return nil if payload.blank?
+
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
 
@@ -49,6 +51,8 @@ module Teamtailor
       end
 
       def self.apply_answers!(application, payload, included_index, client:)
+        return if payload.blank?
+
         answers = extract_answers(payload, included_index)
         answers_index = included_index
 
@@ -157,8 +161,11 @@ module Teamtailor
 
         begin
           response = client.get("/jobs/#{teamtailor_id}", params: { "include" => "questions,stages" })
+          data = response["data"]
+          return nil if data.blank?
+
           Teamtailor::Mappers::JobPostingMapper.upsert!(
-            response["data"],
+            data,
             included_index: Teamtailor::Utils.index_included(response["included"])
           )
         rescue RuntimeError => e
@@ -180,7 +187,10 @@ module Teamtailor
 
         begin
           response = client.get("/candidates/#{teamtailor_id}")
-          Teamtailor::Mappers::CandidateMapper.upsert!(response["data"])
+          data = response["data"]
+          return nil if data.blank?
+
+          Teamtailor::Mappers::CandidateMapper.upsert!(data)
         rescue RuntimeError => e
           return nil if e.message.include?("404")
           raise
