@@ -4,7 +4,7 @@ class TeamtailorSyncJob < ApplicationJob
   retry_on StandardError, wait: :polynomially_longer, attempts: 10
 
   LOCK_KEY = "teamtailor_sync"
-  LOCK_TTL = 30.minutes
+  LOCK_TTL = 5.minutes
 
   def perform
     return unless acquire_lock("sync")
@@ -32,7 +32,10 @@ class TeamtailorSyncJob < ApplicationJob
     acquired = Teamtailor::SyncLock.acquire(@lock_key, owner: owner, ttl: LOCK_TTL)
     return true if acquired
 
-    Rails.logger.info("Teamtailor #{label} skipped: lock held")
+    lock = TeamtailorSyncLock.find_by(key: @lock_key)
+    Rails.logger.info(
+      "Teamtailor #{label} skipped: lock held (locked_by=#{lock&.locked_by}, locked_at=#{lock&.locked_at}, heartbeat_at=#{lock&.heartbeat_at})"
+    )
     false
   end
 
