@@ -2,7 +2,7 @@ module Teamtailor
   class SyncService
     DEFAULT_RESOURCES = {
       "stages" => "/stages",
-      "jobs" => "/jobs",
+      "jobs" => ["/jobs", "/jobs?filter[status]=archived"],
       "candidates" => "/candidates",
       "applications" => ["/job-applications", "/applications"],
       "messages" => "/messages"
