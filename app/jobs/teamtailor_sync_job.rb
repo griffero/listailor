@@ -10,9 +10,9 @@ class TeamtailorSyncJob < ApplicationJob
 
     service = Teamtailor::SyncService.new
 
+    service.sync("applications")
     service.sync("jobs")
     service.sync("candidates")
-    service.sync("applications")
     service.sync("messages")
   ensure
     release_lock

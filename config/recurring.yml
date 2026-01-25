@@ -25,3 +25,7 @@ production:
     class: TeamtailorBackfillAnswersJob
     queue: default
     schedule: every 15 minutes
+  teamtailor_desync_check:
+    class: TeamtailorDesyncCheckJob
+    queue: default
+    schedule: every 1 minute

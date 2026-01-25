@@ -5,8 +5,8 @@ module Teamtailor
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
 
-        job_posting = resolve_job(payload, included_index)
-        candidate = resolve_candidate(payload, included_index)
+        job_posting = resolve_job(payload, included_index, client: client)
+        candidate = resolve_candidate(payload, included_index, client: client)
         stage = resolve_stage(payload, included_index, job_posting: job_posting)
 
         return nil if job_posting.blank? || candidate.blank?
@@ -31,6 +31,9 @@ module Teamtailor
           apply_answers!(application, payload, included_index, client: client)
         end
         sync_stage_transition!(application, stage, attributes)
+        state_synced_at = Utils.parse_time(Utils.attr(attributes, "updated_at", "updated-at")) || Time.current
+        application.mark_teamtailor_state_synced!(synced_at: state_synced_at)
+        application.mark_teamtailor_full_sync_if_ready!(synced_at: state_synced_at) unless skip_answers
 
         application
       end
@@ -105,11 +108,12 @@ module Teamtailor
         relationships = answer_payload.fetch("relationships", {})
         question_ref = relationships.dig("question", "data")
 
-        question_payload = if question_ref
-          Utils.find_included(included_index, question_ref["type"], question_ref["id"])
-        else
-          answer_payload["question"]
-        end
+        question_payload =
+          if question_ref
+            Utils.find_included(included_index, question_ref["type"], question_ref["id"])
+          else
+            answer_payload["question"]
+          end
 
         if question_payload.blank?
           question_payload = fetch_question_for_answer(answer_payload, client: client)
@@ -142,26 +146,47 @@ module Teamtailor
         QuestionMapper.upsert_job_question!(question_payload, job_posting: job_posting, position: position)
       end
 
-      def self.resolve_job(payload, included_index)
+      def self.resolve_job(payload, _included_index, client:)
         job_ref = payload.dig("relationships", "job", "data")
         teamtailor_id = job_ref&.fetch("id", nil)
 
-        if teamtailor_id.present?
-          JobPosting.find_by(teamtailor_id: teamtailor_id)
-        else
-          nil
+        return nil if teamtailor_id.blank?
+
+        job = JobPosting.find_by(teamtailor_id: teamtailor_id)
+        return job if job.present?
+
+        begin
+          response = client.get("/jobs/#{teamtailor_id}", params: { "include" => "questions,stages" })
+          Teamtailor::Mappers::JobPostingMapper.upsert!(
+            response["data"],
+            included_index: Teamtailor::Utils.index_included(response["included"])
+          )
+        rescue RuntimeError => e
+          return nil if e.message.include?("404")
+          raise
         end
+
+        JobPosting.find_by(teamtailor_id: teamtailor_id)
       end
 
-      def self.resolve_candidate(payload, included_index)
+      def self.resolve_candidate(payload, _included_index, client:)
         candidate_ref = payload.dig("relationships", "candidate", "data")
         teamtailor_id = candidate_ref&.fetch("id", nil)
 
-        if teamtailor_id.present?
-          Candidate.find_by(teamtailor_id: teamtailor_id)
-        else
-          nil
+        return nil if teamtailor_id.blank?
+
+        candidate = Candidate.find_by(teamtailor_id: teamtailor_id)
+        return candidate if candidate.present?
+
+        begin
+          response = client.get("/candidates/#{teamtailor_id}")
+          Teamtailor::Mappers::CandidateMapper.upsert!(response["data"])
+        rescue RuntimeError => e
+          return nil if e.message.include?("404")
+          raise
         end
+
+        Candidate.find_by(teamtailor_id: teamtailor_id)
       end
 
       def self.resolve_stage(payload, included_index, job_posting: nil)
@@ -170,13 +195,14 @@ module Teamtailor
         return nil if teamtailor_id.blank?
 
         # Try to find stage for this specific job first, then fall back to global
-        stage = if job_posting
-          PipelineStage.find_by(teamtailor_id: teamtailor_id, job_posting_id: job_posting.id) ||
-            PipelineStage.find_by(teamtailor_id: teamtailor_id, job_posting_id: nil)
-        else
-          PipelineStage.find_by(teamtailor_id: teamtailor_id)
-        end
-        
+        stage =
+          if job_posting
+            PipelineStage.find_by(teamtailor_id: teamtailor_id, job_posting_id: job_posting.id) ||
+              PipelineStage.find_by(teamtailor_id: teamtailor_id, job_posting_id: nil)
+          else
+            PipelineStage.find_by(teamtailor_id: teamtailor_id)
+          end
+
         return stage if stage.present?
 
         stage_payload = Utils.find_included(included_index, "stages", teamtailor_id)
@@ -197,6 +223,20 @@ module Teamtailor
       def self.fetch_answers_from_api(payload, client:)
         application_id = payload["id"]
         return { answers: [], included_index: {} } if application_id.blank?
+
+        begin
+          response = client.get(
+            "/job-applications/#{application_id}",
+            params: { "include" => "answers,answers.question" }
+          )
+          included_index = Utils.index_included(response["included"])
+          answers = extract_answers(response["data"], included_index)
+          return { answers: answers, included_index: included_index } if answers.any?
+        rescue RuntimeError => e
+          unless e.message.include?("404")
+            raise
+          end
+        end
 
         endpoints = [
           "/job-applications/#{application_id}/answers",
@@ -228,11 +268,28 @@ module Teamtailor
         return if candidate_id.blank?
 
         job_questions = application.job_posting.job_questions.where.not(teamtailor_id: nil)
-        return if job_questions.empty?
-
         cache = Thread.current[:teamtailor_answers_cache]
         cache ||= Teamtailor::AnswersCache.new(client: client)
         Thread.current[:teamtailor_answers_cache] = cache
+
+        if job_questions.empty?
+          response = cache.answers_for_candidate(candidate_id)
+          response[:answers].each_with_index do |answer_payload, index|
+            question = resolve_question(
+              answer_payload,
+              application.job_posting,
+              response[:included_index],
+              index,
+              client: client
+            )
+            next if question.blank?
+
+            answer = ApplicationAnswer.find_or_initialize_by(application: application, job_question: question)
+            answer.value = extract_answer_value(answer_payload)
+            answer.save!
+          end
+          return
+        end
 
         job_questions.each do |question|
           answer_payload = cache.answer_for(question.teamtailor_id, candidate_id)

@@ -3,8 +3,6 @@ module Teamtailor
     class MovementMapper
       def self.upsert!(payload)
         attributes = payload.fetch("attributes", {})
-        teamtailor_id = payload["id"]
-        
         # Resolve application
         app_ref = payload.dig("relationships", "job-application", "data")
         return nil if app_ref.blank?
@@ -17,8 +15,13 @@ module Teamtailor
         to_stage_id = attributes["to-stage-id"]
         return nil if to_stage_id.blank?
         
-        from_stage = PipelineStage.find_by(teamtailor_id: from_stage_id) if from_stage_id.present?
-        to_stage = PipelineStage.find_by(teamtailor_id: to_stage_id)
+        from_stage =
+          if from_stage_id.present?
+            PipelineStage.find_by(teamtailor_id: from_stage_id, job_posting_id: application.job_posting_id) ||
+              PipelineStage.find_by(teamtailor_id: from_stage_id, job_posting_id: nil)
+          end
+        to_stage = PipelineStage.find_by(teamtailor_id: to_stage_id, job_posting_id: application.job_posting_id) ||
+          PipelineStage.find_by(teamtailor_id: to_stage_id, job_posting_id: nil)
         return nil if to_stage.blank?
         
         # Parse date
@@ -35,6 +38,7 @@ module Teamtailor
         transition.from_stage = from_stage
         transition.transitioned_at = transitioned_at
         transition.save!
+        application.mark_teamtailor_state_synced!(synced_at: transitioned_at)
         
         transition
       end

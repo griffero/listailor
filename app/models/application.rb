@@ -19,6 +19,7 @@ class Application < ApplicationRecord
   scope :for_job, ->(job_posting_id) { where(job_posting_id: job_posting_id) }
   scope :for_stage, ->(stage_id) { where(current_stage_id: stage_id) }
   scope :recent, -> { order(created_at: :desc) }
+  scope :missing_teamtailor_full_sync, -> { where(teamtailor_full_sync_at: nil) }
   scope :search, ->(query) {
     return all if query.blank?
     joins(:candidate).where(
@@ -138,6 +139,29 @@ class Application < ApplicationRecord
     end
 
     items.sort_by { |item| item[:occurred_at] }.reverse
+  end
+
+  def custom_questions_ready?
+    questions = job_posting.job_questions.where.not(teamtailor_id: nil)
+    return true if questions.empty?
+
+    answered_ids = application_answers
+      .where(job_question_id: questions.select(:id))
+      .distinct
+      .pluck(:job_question_id)
+
+    answered_ids.size >= questions.count
+  end
+
+  def mark_teamtailor_state_synced!(synced_at: Time.current)
+    update_column(:teamtailor_state_synced_at, synced_at)
+  end
+
+  def mark_teamtailor_full_sync_if_ready!(synced_at: Time.current)
+    return false unless custom_questions_ready?
+
+    update_column(:teamtailor_full_sync_at, synced_at)
+    true
   end
 
   private

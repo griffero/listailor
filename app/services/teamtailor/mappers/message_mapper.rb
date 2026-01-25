@@ -5,11 +5,16 @@ module Teamtailor
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
 
-        if email_like?(attributes)
-          upsert_email!(application, teamtailor_id, attributes)
-        else
-          upsert_event!(application, teamtailor_id, attributes)
-        end
+        record =
+          if email_like?(attributes)
+            upsert_email!(application, teamtailor_id, attributes)
+          else
+            upsert_event!(application, teamtailor_id, attributes)
+          end
+
+        synced_at = Utils.parse_time(Utils.attr(attributes, "updated_at", "updated-at", "created_at", "created-at")) || Time.current
+        application.mark_teamtailor_state_synced!(synced_at: synced_at)
+        record
       end
 
       def self.email_like?(attributes)
