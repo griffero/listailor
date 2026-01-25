@@ -90,7 +90,8 @@ module Teamtailor
             when "candidates"
               Mappers::CandidateMapper.upsert!(item)
             when "applications"
-              Mappers::ApplicationMapper.upsert!(item, included_index: included_index, client: @client)
+              skip_answers = ENV["TEAMTAILOR_SKIP_ANSWERS"] == "true"
+              Mappers::ApplicationMapper.upsert!(item, included_index: included_index, client: @client, skip_answers: skip_answers)
             when "messages"
               application = resolve_message_application(item)
               next if application.blank?

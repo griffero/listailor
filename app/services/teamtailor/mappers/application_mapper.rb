@@ -1,7 +1,7 @@
 module Teamtailor
   module Mappers
     class ApplicationMapper
-      def self.upsert!(payload, included_index: {}, client: Client.new)
+      def self.upsert!(payload, included_index: {}, client: Client.new, skip_answers: false)
         attributes = payload.fetch("attributes", {})
         teamtailor_id = payload["id"]
 
@@ -26,8 +26,10 @@ module Teamtailor
 
         application.save!
 
-        apply_cover_letter!(application, attributes)
-        apply_answers!(application, payload, included_index, client: client)
+        unless skip_answers
+          apply_cover_letter!(application, attributes)
+          apply_answers!(application, payload, included_index, client: client)
+        end
         sync_stage_transition!(application, stage, attributes)
 
         application
