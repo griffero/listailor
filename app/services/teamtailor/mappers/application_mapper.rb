@@ -62,6 +62,8 @@ module Teamtailor
           answers_index = response[:included_index] || included_index
         end
 
+        answers = Array(answers).select { |answer| answer.is_a?(Hash) }
+
         if answers.blank?
           apply_answers_from_cache(application, client: client)
           return
@@ -109,6 +111,8 @@ module Teamtailor
       end
 
       def self.resolve_question(answer_payload, job_posting, included_index, index, client:)
+        return nil unless answer_payload.is_a?(Hash)
+
         relationships = answer_payload.fetch("relationships", {})
         question_ref = relationships.dig("question", "data")
 

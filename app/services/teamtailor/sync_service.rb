@@ -71,6 +71,8 @@ module Teamtailor
           stop = false
 
           data.each do |item|
+            next if item.blank?
+
             attributes = item.fetch("attributes", {})
             updated_at = Utils.parse_time(Utils.attr(attributes, "updated_at", "updated-at"))
 
