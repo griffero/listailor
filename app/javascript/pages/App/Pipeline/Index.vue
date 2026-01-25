@@ -7,11 +7,13 @@ import draggable from 'vuedraggable'
 const props = defineProps({
   stages: Array,
   jobs: Array,
+  selectedJobId: String,
   currentUser: Object
 })
 
 // Slide-over state
 const showManagePanel = ref(false)
+const selectedJob = ref(props.selectedJobId || '')
 const managedStages = ref([])
 const editingStageId = ref(null)
 const editForm = ref({ name: '', kind: 'active' })
@@ -136,6 +138,14 @@ function formatDate(dateStr) {
     day: 'numeric'
   })
 }
+
+function filterByJob() {
+  const params = selectedJob.value ? { job_id: selectedJob.value } : {}
+  router.get('/app/pipeline', params, {
+    preserveState: true,
+    preserveScroll: true
+  })
+}
 </script>
 
 <template>
@@ -161,6 +171,22 @@ function formatDate(dateStr) {
             Add Application
           </Link>
         </div>
+      </div>
+
+      <!-- Job Filter -->
+      <div class="flex items-center gap-3">
+        <label for="job-filter" class="text-sm font-medium text-gray-700">Filter by job:</label>
+        <select
+          id="job-filter"
+          v-model="selectedJob"
+          @change="filterByJob"
+          class="flex-1 max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="">All Jobs</option>
+          <option v-for="job in jobs" :key="job.id" :value="job.id">
+            {{ job.title }}
+          </option>
+        </select>
       </div>
 
       <div class="flex gap-4 overflow-x-auto pb-4">
