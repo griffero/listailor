@@ -12,8 +12,11 @@ class TeamtailorSyncJob < ApplicationJob
     service = Teamtailor::SyncService.new
 
     service.sync("applications")
+    heartbeat_lock
     service.sync("jobs")
+    heartbeat_lock
     service.sync("candidates")
+    heartbeat_lock
     service.sync("messages")
   ensure
     release_lock
@@ -39,5 +42,11 @@ class TeamtailorSyncJob < ApplicationJob
     Teamtailor::SyncLock.release(@lock_key, owner: @lock_owner)
   ensure
     @lock_owner = nil
+  end
+
+  def heartbeat_lock
+    return if @lock_owner.blank?
+
+    Teamtailor::SyncLock.heartbeat(@lock_key, owner: @lock_owner)
   end
 end

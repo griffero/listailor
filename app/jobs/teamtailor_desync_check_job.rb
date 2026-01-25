@@ -5,7 +5,7 @@ class TeamtailorDesyncCheckJob < ApplicationJob
 
   LOCK_KEY = "teamtailor_desync_check"
   LOCK_TTL = 10.minutes
-  BATCH_SIZE = 200
+  BATCH_SIZE = 50
 
   def perform
     return unless acquire_lock
@@ -40,6 +40,7 @@ class TeamtailorDesyncCheckJob < ApplicationJob
         Teamtailor::Mappers::ApplicationMapper.apply_answers!(app, payload, included_index, client: client)
         app.mark_teamtailor_state_synced!(synced_at: Time.current)
         app.mark_teamtailor_full_sync_if_ready!(synced_at: Time.current)
+        heartbeat_lock if (app.id % 10).zero?
       rescue => e
         Rails.logger.warn("TeamtailorDesyncCheckJob: Failed for app #{app.id}: #{e.message}")
       end
@@ -68,5 +69,11 @@ class TeamtailorDesyncCheckJob < ApplicationJob
     Teamtailor::SyncLock.release(@lock_key, owner: @lock_owner)
   ensure
     @lock_owner = nil
+  end
+
+  def heartbeat_lock
+    return if @lock_owner.blank?
+
+    Teamtailor::SyncLock.heartbeat(@lock_key, owner: @lock_owner)
   end
 end

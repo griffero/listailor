@@ -5,7 +5,14 @@ module Teamtailor
 
       lock = TeamtailorSyncLock.find_or_initialize_by(key: key)
 
-      if lock.locked_at.present? && lock.locked_at > ttl.ago && lock.locked_by.present? && lock.locked_by != owner
+      if lock.locked_at.present? && lock.locked_at <= ttl.ago
+        Rails.logger.warn(
+          "Teamtailor lock stale for #{key}, taking over (locked_by=#{lock.locked_by}, locked_at=#{lock.locked_at})"
+        )
+      elsif lock.locked_at.present? && lock.locked_at > ttl.ago && lock.locked_by.present? && lock.locked_by != owner
+        Rails.logger.info(
+          "Teamtailor lock held for #{key} (locked_by=#{lock.locked_by}, locked_at=#{lock.locked_at})"
+        )
         return false
       end
 

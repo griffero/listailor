@@ -35,4 +35,10 @@ class TeamtailorBackfillJob < ApplicationJob
   ensure
     @lock_owner = nil
   end
+
+  def heartbeat_lock
+    return if @lock_owner.blank?
+
+    Teamtailor::SyncLock.heartbeat(@lock_key, owner: @lock_owner)
+  end
 end
