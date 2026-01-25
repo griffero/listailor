@@ -1,6 +1,7 @@
 class PipelineStage < ApplicationRecord
   KINDS = %w[active hired rejected].freeze
 
+  belongs_to :job_posting, optional: true
   has_many :applications, foreign_key: :current_stage_id, dependent: :nullify
   has_many :transitions_from, class_name: "ApplicationStageTransition", foreign_key: :from_stage_id, dependent: :nullify
   has_many :transitions_to, class_name: "ApplicationStageTransition", foreign_key: :to_stage_id, dependent: :restrict_with_error
@@ -8,11 +9,13 @@ class PipelineStage < ApplicationRecord
   validates :name, presence: true
   validates :position, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :kind, presence: true, inclusion: { in: KINDS }
-  validates :teamtailor_id, uniqueness: true, allow_nil: true
+  validates :teamtailor_id, uniqueness: { scope: :job_posting_id }, allow_nil: true
 
   scope :ordered, -> { order(position: :asc) }
   scope :active, -> { where(kind: "active") }
   scope :terminal, -> { where(kind: %w[hired rejected]) }
+  scope :for_job, ->(job_id) { where(job_posting_id: job_id) }
+  scope :global, -> { where(job_posting_id: nil) }
 
   def active?
     kind == "active"

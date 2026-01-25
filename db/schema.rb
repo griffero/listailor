@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_24_002938) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_25_025500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -191,8 +191,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_24_002938) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "teamtailor_id"
+    t.index ["job_posting_id", "teamtailor_id"], name: "index_job_questions_on_job_posting_id_and_teamtailor_id", unique: true
     t.index ["job_posting_id"], name: "index_job_questions_on_job_posting_id"
-    t.index ["teamtailor_id"], name: "index_job_questions_on_teamtailor_id", unique: true
   end
 
   create_table "pipeline_stages", force: :cascade do |t|
@@ -202,9 +202,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_24_002938) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "teamtailor_id"
+    t.bigint "job_posting_id"
+    t.index ["job_posting_id", "teamtailor_id"], name: "index_pipeline_stages_on_job_and_tt_id", unique: true, where: "(teamtailor_id IS NOT NULL)"
+    t.index ["job_posting_id"], name: "index_pipeline_stages_on_job_posting_id"
     t.index ["kind"], name: "index_pipeline_stages_on_kind"
     t.index ["position"], name: "index_pipeline_stages_on_position"
-    t.index ["teamtailor_id"], name: "index_pipeline_stages_on_teamtailor_id", unique: true
   end
 
   create_table "settings", force: :cascade do |t|
@@ -393,6 +395,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_24_002938) do
   add_foreign_key "email_templates", "users", column: "created_by_user_id"
   add_foreign_key "interview_events", "applications"
   add_foreign_key "job_questions", "job_postings"
+  add_foreign_key "pipeline_stages", "job_postings"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

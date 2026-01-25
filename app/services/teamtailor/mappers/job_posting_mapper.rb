@@ -21,7 +21,20 @@ module Teamtailor
         job.save!
 
         upsert_questions!(job, payload, included_index)
+        upsert_stages!(job, payload, included_index)
         job
+      end
+      
+      def self.upsert_stages!(job, payload, included_index)
+        stage_refs = payload.dig("relationships", "stages", "data")
+        return unless stage_refs.is_a?(Array)
+
+        stage_refs.each do |stage_ref|
+          stage_payload = Utils.find_included(included_index, stage_ref["type"], stage_ref["id"])
+          next if stage_payload.blank?
+
+          StageMapper.upsert!(stage_payload, job_posting: job)
+        end
       end
 
       def self.upsert_questions!(job, payload, included_index)

@@ -7,7 +7,7 @@ module Teamtailor
 
         job_posting = resolve_job(payload, included_index)
         candidate = resolve_candidate(payload, included_index)
-        stage = resolve_stage(payload, included_index)
+        stage = resolve_stage(payload, included_index, job_posting: job_posting)
 
         return nil if job_posting.blank? || candidate.blank?
 
@@ -164,15 +164,25 @@ module Teamtailor
         end
       end
 
-      def self.resolve_stage(payload, included_index)
+      def self.resolve_stage(payload, included_index, job_posting: nil)
         stage_ref = payload.dig("relationships", "stage", "data")
         teamtailor_id = stage_ref&.fetch("id", nil)
         return nil if teamtailor_id.blank?
 
-        stage_payload = Utils.find_included(included_index, "stages", teamtailor_id)
-        return PipelineStage.find_by(teamtailor_id: teamtailor_id) if stage_payload.blank?
+        # Try to find stage for this specific job first, then fall back to global
+        stage = if job_posting
+          PipelineStage.find_by(teamtailor_id: teamtailor_id, job_posting_id: job_posting.id) ||
+            PipelineStage.find_by(teamtailor_id: teamtailor_id, job_posting_id: nil)
+        else
+          PipelineStage.find_by(teamtailor_id: teamtailor_id)
+        end
+        
+        return stage if stage.present?
 
-        StageMapper.upsert!(stage_payload)
+        stage_payload = Utils.find_included(included_index, "stages", teamtailor_id)
+        return nil if stage_payload.blank?
+
+        StageMapper.upsert!(stage_payload, job_posting: job_posting)
       end
 
       def self.sync_stage_transition!(application, stage, attributes)

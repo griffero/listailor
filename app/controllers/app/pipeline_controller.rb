@@ -1,8 +1,18 @@
 module App
   class PipelineController < BaseController
     def index
-      @stages = PipelineStage.ordered.includes(applications: [:candidate, :job_posting])
       @job_filter = params[:job_id].presence
+      
+      if @job_filter.present?
+        @stages = PipelineStage.where(job_posting_id: @job_filter)
+                               .or(PipelineStage.where(job_posting_id: nil))
+                               .ordered
+                               .includes(applications: [:candidate, :job_posting])
+      else
+        @stages = PipelineStage.where(job_posting_id: nil)
+                               .ordered
+                               .includes(applications: [:candidate, :job_posting])
+      end
 
       render inertia: "App/Pipeline/Index", props: {
         stages: @stages.map { |stage| serialize_stage_with_applications(stage, @job_filter) },

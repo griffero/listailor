@@ -10,7 +10,7 @@ module Teamtailor
 
     DEFAULT_INCLUDES = {
       "applications" => "job,candidate,stage",
-      "jobs" => "questions"
+      "jobs" => "questions,stages"
     }.freeze
     def initialize(client: Client.new, logger: Rails.logger)
       @client = client
