@@ -14,18 +14,14 @@ production:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
   teamtailor_sync:
-    class: TeamtailorSyncJob
-    queue: default
+    command: "TeamtailorSyncJob.perform_later"
     schedule: every 30 seconds
   teamtailor_backfill:
-    class: TeamtailorBackfillJob
-    queue: default
+    command: "TeamtailorBackfillJob.perform_later"
     schedule: at 3am every day
   teamtailor_backfill_answers:
-    class: TeamtailorBackfillAnswersJob
-    queue: default
+    command: "TeamtailorBackfillAnswersJob.perform_later"
     schedule: every 30 minutes
   teamtailor_desync_check:
-    class: TeamtailorDesyncCheckJob
-    queue: default
+    command: "TeamtailorDesyncCheckJob.perform_later"
     schedule: every 5 minutes
