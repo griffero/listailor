@@ -26,9 +26,12 @@ module App
     end
 
     def show
+      # Only show stages for this application's job
+      job_stages = PipelineStage.where(job_posting_id: @application.job_posting_id).ordered
+      
       render inertia: "App/Applications/Show", props: {
         application: serialize_application_full(@application),
-        stages: PipelineStage.ordered.map { |stage| serialize_stage(stage) },
+        stages: job_stages.map { |stage| serialize_stage(stage) },
         emailTemplates: EmailTemplate.ordered.map { |t| { id: t.id, name: t.name } },
         timeline: @application.timeline_items
       }

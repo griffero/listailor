@@ -3,20 +3,31 @@ module App
     def index
       @job_filter = params[:job_id].presence
       
+      # Auto-select first job with applications if no filter
+      if @job_filter.blank?
+        default_job = JobPosting.where.not(teamtailor_id: nil)
+                                .joins(:applications)
+                                .group("job_postings.id")
+                                .order("COUNT(applications.id) DESC")
+                                .first
+        @job_filter = default_job&.id&.to_s
+      end
+      
       if @job_filter.present?
         @stages = PipelineStage.where(job_posting_id: @job_filter)
-                               .or(PipelineStage.where(job_posting_id: nil))
                                .ordered
                                .includes(applications: [:candidate, :job_posting])
       else
-        @stages = PipelineStage.where(job_posting_id: nil)
-                               .ordered
-                               .includes(applications: [:candidate, :job_posting])
+        @stages = []
       end
 
       render inertia: "App/Pipeline/Index", props: {
         stages: @stages.map { |stage| serialize_stage_with_applications(stage, @job_filter) },
-        jobs: JobPosting.where.not(teamtailor_id: nil).ordered.map { |job| { id: job.id, title: job.title } },
+        jobs: JobPosting.where.not(teamtailor_id: nil).ordered.map { |job| { 
+          id: job.id, 
+          title: job.title,
+          applicationCount: job.applications.count
+        } },
         selectedJobId: @job_filter
       }
     end

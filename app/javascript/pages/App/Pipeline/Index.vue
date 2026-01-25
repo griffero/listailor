@@ -154,7 +154,10 @@ function filterByJob() {
       <div class="flex justify-between items-center">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Pipeline</h1>
-          <p class="text-gray-600">Drag applications between stages</p>
+          <p class="text-gray-600" v-if="selectedJob">
+            {{ jobs.find(j => j.id == selectedJob)?.title || 'Loading...' }}
+          </p>
+          <p class="text-gray-600" v-else>Select a job to view its pipeline</p>
         </div>
         <div class="flex gap-3">
           <button
@@ -173,23 +176,28 @@ function filterByJob() {
         </div>
       </div>
 
-      <!-- Job Filter -->
-      <div class="flex items-center gap-3">
-        <label for="job-filter" class="text-sm font-medium text-gray-700">Filter by job:</label>
-        <select
-          id="job-filter"
-          v-model="selectedJob"
-          @change="filterByJob"
-          class="flex-1 max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          <option value="">All Jobs</option>
-          <option v-for="job in jobs" :key="job.id" :value="job.id">
-            {{ job.title }}
-          </option>
-        </select>
+      <!-- Job Selector -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center gap-3">
+          <label for="job-filter" class="text-sm font-medium text-gray-700">Viewing pipeline for:</label>
+          <select
+            id="job-filter"
+            v-model="selectedJob"
+            @change="filterByJob"
+            class="flex-1 max-w-2xl px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option v-for="job in jobs" :key="job.id" :value="job.id">
+              {{ job.title }} ({{ job.applicationCount }} applications)
+            </option>
+          </select>
+        </div>
       </div>
 
-      <div class="flex gap-4 overflow-x-auto pb-4">
+      <div v-if="stages.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
+        <p class="text-gray-500">No stages found for this job. Select a different job or sync Teamtailor data.</p>
+      </div>
+
+      <div v-else class="flex gap-4 overflow-x-auto pb-4">
         <div 
           v-for="stage in stages" 
           :key="stage.id"
