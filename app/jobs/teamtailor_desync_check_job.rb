@@ -13,20 +13,10 @@ class TeamtailorDesyncCheckJob < ApplicationJob
     client = Teamtailor::Client.new
 
     apps_needing_answers = Application
-      .missing_teamtailor_full_sync
+      .where(teamtailor_full_sync_at: nil)
       .where.not(teamtailor_id: nil)
-      .where(<<~SQL)
-        EXISTS (
-          SELECT 1 FROM job_questions jq
-          WHERE jq.job_posting_id = applications.job_posting_id
-            AND jq.teamtailor_id IS NOT NULL
-            AND NOT EXISTS (
-              SELECT 1 FROM application_answers aa
-              WHERE aa.application_id = applications.id
-                AND aa.job_question_id = jq.id
-            )
-        )
-      SQL
+      .joins(:job_posting)
+      .where.not(job_postings: { teamtailor_id: nil })
       .limit(BATCH_SIZE)
 
     Rails.logger.info("TeamtailorDesyncCheckJob: Processing #{apps_needing_answers.count} applications")
@@ -39,7 +29,8 @@ class TeamtailorDesyncCheckJob < ApplicationJob
 
         Teamtailor::Mappers::ApplicationMapper.apply_answers!(app, payload, included_index, client: client)
         app.mark_teamtailor_state_synced!(synced_at: Time.current)
-        app.mark_teamtailor_full_sync_if_ready!(synced_at: Time.current)
+        # Mark as synced even if no answers - we've attempted the sync
+        app.mark_teamtailor_full_sync!(synced_at: Time.current)
         heartbeat_lock if (app.id % 10).zero?
       rescue => e
         Rails.logger.warn("TeamtailorDesyncCheckJob: Failed for app #{app.id}: #{e.message}")

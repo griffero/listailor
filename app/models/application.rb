@@ -145,22 +145,22 @@ class Application < ApplicationRecord
     questions = job_posting.job_questions.where.not(teamtailor_id: nil)
     return true if questions.empty?
 
-    answered_ids = application_answers
-      .where(job_question_id: questions.select(:id))
-      .distinct
-      .pluck(:job_question_id)
-
-    answered_ids.size >= questions.count
+    # At least one answer exists - we've attempted to sync
+    application_answers.where(job_question_id: questions.select(:id)).exists?
   end
 
   def mark_teamtailor_state_synced!(synced_at: Time.current)
     update_column(:teamtailor_state_synced_at, synced_at)
   end
 
+  def mark_teamtailor_full_sync!(synced_at: Time.current)
+    update_column(:teamtailor_full_sync_at, synced_at)
+  end
+
   def mark_teamtailor_full_sync_if_ready!(synced_at: Time.current)
     return false unless custom_questions_ready?
 
-    update_column(:teamtailor_full_sync_at, synced_at)
+    mark_teamtailor_full_sync!(synced_at: synced_at)
     true
   end
 

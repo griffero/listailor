@@ -12,13 +12,12 @@ class TeamtailorBackfillAnswersJob < ApplicationJob
     
     client = Teamtailor::Client.new
     
-    # Find applications without custom answers
+    # Find applications needing answer sync
     apps_without_answers = Application
+      .where(teamtailor_full_sync_at: nil)
+      .where.not(teamtailor_id: nil)
       .joins(:job_posting)
-      .joins("INNER JOIN job_questions ON job_questions.job_posting_id = applications.job_posting_id")
-      .where("job_questions.teamtailor_id IS NOT NULL")
-      .where.not(id: ApplicationAnswer.select(:application_id).where.not(job_question_id: nil))
-      .distinct
+      .where.not(job_postings: { teamtailor_id: nil })
       .limit(BATCH_SIZE)
     
     Rails.logger.info("TeamtailorBackfillAnswersJob: Processing #{apps_without_answers.count} applications")
@@ -30,7 +29,8 @@ class TeamtailorBackfillAnswersJob < ApplicationJob
         included_index = Teamtailor::Utils.index_included(resp["included"])
         
         Teamtailor::Mappers::ApplicationMapper.apply_answers!(app, payload, included_index, client: client)
-        app.mark_teamtailor_full_sync_if_ready!(synced_at: Time.current)
+        # Mark as synced even if no answers - we've attempted the sync
+        app.mark_teamtailor_full_sync!(synced_at: Time.current)
         heartbeat_lock if (app.id % 25).zero?
       rescue => e
         Rails.logger.warn("Failed to backfill answers for app #{app.id}: #{e.message}")
