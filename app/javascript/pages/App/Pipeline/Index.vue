@@ -105,12 +105,12 @@ const countByCountry = computed(() => {
   return counts
 })
 
-function onDragEnd(stageId, event) {
+function onDragEnd(targetStageId, event) {
   const appId = event.item.dataset.appId
-  if (!appId) return
+  if (!appId || !targetStageId) return
   
   router.post(`/app/applications/${appId}/move_stage`, {
-    stage_id: stageId
+    stage_id: targetStageId
   }, {
     preserveScroll: true
   })
@@ -274,13 +274,6 @@ const groupedJobs = computed(() => {
           <p class="text-gray-600" v-else>Select a job to view its pipeline</p>
         </div>
         <div class="flex gap-3">
-          <button
-            type="button"
-            @click="showManagePanel = true"
-            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition cursor-pointer"
-          >
-            Manage Stages
-          </button>
           <Link 
             href="/app/applications/new"
             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
@@ -354,7 +347,7 @@ const groupedJobs = computed(() => {
       <div v-else class="flex gap-4 overflow-x-auto pb-4">
         <div 
           v-for="stage in stages" 
-          :key="stage.id"
+          :key="stage.canonical"
           class="flex-shrink-0 w-72"
         >
           <div 
@@ -375,7 +368,7 @@ const groupedJobs = computed(() => {
               group="applications"
               item-key="id"
               class="p-2 min-h-[200px] space-y-2"
-              @end="(e) => onDragEnd(stage.id, e)"
+              @end="(e) => onDragEnd(stage.targetStageId, e)"
             >
               <template #item="{ element: app }">
                 <div 
@@ -384,7 +377,7 @@ const groupedJobs = computed(() => {
                 >
                   <Link :href="`/app/applications/${app.id}`" class="block">
                     <div class="font-medium text-gray-900 text-sm">{{ app.candidate.name }}</div>
-                    <div class="text-xs text-gray-500 mt-1">{{ app.job.title }}</div>
+                    <div v-if="app.stageName" class="text-xs text-indigo-600 mt-1">{{ app.stageName }}</div>
                     <div class="text-xs text-gray-400 mt-1">{{ formatDate(app.createdAt) }}</div>
                   </Link>
                 </div>
