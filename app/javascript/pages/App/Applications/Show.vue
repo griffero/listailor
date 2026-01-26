@@ -259,6 +259,42 @@ function answerLink(value) {
             </a>
           </div>
 
+          <!-- Education -->
+          <div v-if="application.education || (application.cvUrl && !application.processingCompleted)" class="bg-white rounded-lg shadow p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Education</h3>
+            
+            <!-- Loading state -->
+            <div v-if="application.cvUrl && !application.processingCompleted && !application.education" class="text-sm text-gray-500 italic">
+              Extracting education from CV...
+            </div>
+            
+            <!-- Education content -->
+            <div v-else-if="application.education" class="space-y-4 text-sm">
+              <!-- University -->
+              <div v-if="application.education.university">
+                <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">University</div>
+                <div class="font-medium text-gray-900">{{ application.education.university.name }}</div>
+                <div v-if="application.education.university.degree" class="text-gray-600">
+                  {{ application.education.university.degree }}
+                </div>
+                <div v-if="application.education.university.graduation_year" class="text-gray-500 text-xs">
+                  {{ application.education.university.graduation_year }}
+                </div>
+              </div>
+              
+              <!-- School -->
+              <div v-if="application.education.school">
+                <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">School</div>
+                <div class="font-medium text-gray-900">{{ application.education.school.name }}</div>
+              </div>
+              
+              <!-- No education found -->
+              <div v-if="!application.education.university && !application.education.school" class="text-gray-500 italic">
+                No education information found in CV
+              </div>
+            </div>
+          </div>
+
           <!-- Interviews -->
           <div v-if="application.interviews && application.interviews.length > 0" class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-900 mb-4">Interviews</h3>

@@ -25,3 +25,6 @@ production:
   teamtailor_desync_check:
     command: "TeamtailorDesyncCheckJob.perform_later"
     schedule: every 5 minutes
+  education_extraction:
+    command: "EducationExtractionJob.perform_later"
+    schedule: every 3 minutes

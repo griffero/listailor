@@ -130,6 +130,8 @@ module App
         utmMedium: app.utm_medium,
         utmCampaign: app.utm_campaign,
         cvUrl: app.cv.attached? ? rails_blob_path(app.cv) : nil,
+        education: app.education,
+        processingCompleted: app.processing_completed_at.present?,
         answers: app.application_answers.ordered.map do |answer|
           {
             question: answer.question_label,

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_25_025500) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_26_184105) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -94,11 +94,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_025500) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "teamtailor_id"
+    t.datetime "teamtailor_state_synced_at"
+    t.datetime "teamtailor_full_sync_at"
+    t.jsonb "education"
+    t.datetime "processing_completed_at"
     t.index ["candidate_id"], name: "index_applications_on_candidate_id"
     t.index ["current_stage_id"], name: "index_applications_on_current_stage_id"
     t.index ["job_posting_id", "candidate_id"], name: "index_applications_on_job_posting_id_and_candidate_id", unique: true
     t.index ["job_posting_id"], name: "index_applications_on_job_posting_id"
+    t.index ["processing_completed_at"], name: "index_applications_on_processing_completed_at"
+    t.index ["teamtailor_full_sync_at"], name: "index_applications_on_teamtailor_full_sync_at"
     t.index ["teamtailor_id"], name: "index_applications_on_teamtailor_id", unique: true
+    t.index ["teamtailor_state_synced_at"], name: "index_applications_on_teamtailor_state_synced_at"
   end
 
   create_table "candidates", force: :cascade do |t|
@@ -203,6 +210,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_025500) do
     t.datetime "updated_at", null: false
     t.string "teamtailor_id"
     t.bigint "job_posting_id"
+    t.string "canonical_stage"
+    t.index ["canonical_stage"], name: "index_pipeline_stages_on_canonical_stage"
     t.index ["job_posting_id", "teamtailor_id"], name: "index_pipeline_stages_on_job_and_tt_id", unique: true, where: "(teamtailor_id IS NOT NULL)"
     t.index ["job_posting_id"], name: "index_pipeline_stages_on_job_posting_id"
     t.index ["kind"], name: "index_pipeline_stages_on_kind"
@@ -357,6 +366,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_025500) do
     t.index ["expires_at"], name: "index_solid_queue_semaphores_on_expires_at"
     t.index ["key", "value"], name: "index_solid_queue_semaphores_on_key_and_value"
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
+  end
+
+  create_table "teamtailor_sync_locks", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "locked_by"
+    t.datetime "locked_at"
+    t.datetime "heartbeat_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_teamtailor_sync_locks_on_key", unique: true
   end
 
   create_table "teamtailor_sync_states", force: :cascade do |t|
