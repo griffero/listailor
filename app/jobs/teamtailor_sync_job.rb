@@ -25,7 +25,8 @@ class TeamtailorSyncJob < ApplicationJob
   private
 
   def acquire_lock(label)
-    owner = "#{label}-#{Process.pid}"
+    # Use process.pid + thread.object_id to uniquely identify each worker thread
+    owner = "#{label}-#{Process.pid}-#{Thread.current.object_id}"
     @lock_owner = owner
     @lock_key = LOCK_KEY
 

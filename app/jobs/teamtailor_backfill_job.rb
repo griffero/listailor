@@ -17,7 +17,7 @@ class TeamtailorBackfillJob < ApplicationJob
   private
 
   def acquire_lock(label)
-    owner = "#{label}-#{Process.pid}"
+    owner = "#{label}-#{Process.pid}-#{Thread.current.object_id}"
     @lock_owner = owner
     @lock_key = LOCK_KEY
 
