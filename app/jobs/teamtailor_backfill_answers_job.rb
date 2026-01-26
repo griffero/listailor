@@ -4,8 +4,8 @@ class TeamtailorBackfillAnswersJob < ApplicationJob
   retry_on StandardError, wait: :polynomially_longer, attempts: 5
   
   LOCK_KEY = "teamtailor_backfill_answers"
-  LOCK_TTL = 2.hours
-  BATCH_SIZE = 200
+  LOCK_TTL = 30.minutes
+  BATCH_SIZE = 500
   
   def perform
     return unless acquire_lock
