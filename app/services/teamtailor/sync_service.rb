@@ -93,7 +93,8 @@ module Teamtailor
             when "candidates"
               Mappers::CandidateMapper.upsert!(item)
             when "applications"
-              skip_answers = ENV["TEAMTAILOR_SKIP_ANSWERS"] == "true"
+              # Default to skipping answers in regular sync - use backfill jobs for answers
+              skip_answers = ENV.fetch("TEAMTAILOR_SKIP_ANSWERS", "true") != "false"
               Mappers::ApplicationMapper.upsert!(item, included_index: included_index, client: @client, skip_answers: skip_answers)
             when "movements"
               Mappers::MovementMapper.upsert!(item)
