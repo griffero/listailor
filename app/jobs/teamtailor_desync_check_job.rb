@@ -4,8 +4,8 @@ class TeamtailorDesyncCheckJob < ApplicationJob
   retry_on StandardError, wait: :polynomially_longer, attempts: 5
 
   LOCK_KEY = "teamtailor_desync_check"
-  LOCK_TTL = 20.minutes
-  BATCH_SIZE = 200
+  LOCK_TTL = 15.minutes
+  BATCH_SIZE = 50
 
   def perform
     return unless acquire_lock

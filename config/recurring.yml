@@ -21,7 +21,7 @@ production:
     schedule: at 3am every day
   teamtailor_backfill_answers:
     command: "TeamtailorBackfillAnswersJob.perform_later"
-    schedule: every 2 minutes
+    schedule: every 5 minutes
   teamtailor_desync_check:
     command: "TeamtailorDesyncCheckJob.perform_later"
-    schedule: every 2 minutes
+    schedule: every 5 minutes
