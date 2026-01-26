@@ -55,15 +55,9 @@ module Teamtailor
 
         answers = extract_answers(payload, included_index)
         answers_index = included_index
-
-        if answers.blank?
-          response = fetch_answers_from_api(payload, client: client)
-          answers = response[:answers]
-          answers_index = response[:included_index] || included_index
-        end
-
         answers = Array(answers).select { |answer| answer.is_a?(Hash) }
 
+        # Skip slow fetch_answers_from_api - go straight to cache which is faster
         if answers.blank?
           apply_answers_from_cache(application, client: client)
           return
