@@ -20,11 +20,89 @@ const editForm = ref({ name: '', kind: 'active' })
 const newStageForm = ref({ name: '', kind: 'active' })
 const isSubmitting = ref(false)
 
+// Country filter state
+const selectedCountry = ref('all')
+
 // Sync managed stages when panel opens
 watch(showManagePanel, (open) => {
   if (open) {
     managedStages.value = props.stages.map(s => ({ ...s }))
   }
+})
+
+// Infer country from job title
+function inferCountry(title) {
+  const t = title.toLowerCase()
+  if (t.includes('méxico') || t.includes('mexico') || t.includes('méx') || t.includes('mex ') || t.includes(' mx') || t.includes('cdmx')) {
+    return 'mx'
+  }
+  if (t.includes('chile') || t.includes(' cl')) {
+    return 'cl'
+  }
+  // Default to Chile if no country indicator
+  return 'cl'
+}
+
+// Infer department from job title
+function inferDepartment(title) {
+  const t = title.toLowerCase()
+  
+  // Engineering
+  if (t.includes('engineer') || t.includes('developer') || t.includes('devops') || t.includes('frontend') || t.includes('backend') || t.includes('software') || t.includes('security') || t.includes('infrastructure') || t.includes('sre')) {
+    return 'Engineering'
+  }
+  // Product
+  if (t.includes('product manager') || t.includes('product ops') || t.includes('product operations') || t.includes('product designer')) {
+    return 'Product'
+  }
+  // Sales
+  if (t.includes('sales') || t.includes('account exec') || t.includes('account manager') || t.includes('key account') || t.includes('bdr') || t.includes('business development')) {
+    return 'Sales'
+  }
+  // People
+  if (t.includes('people') || t.includes('recruiter') || t.includes('talent') || t.includes('hr ') || t.includes('human resources')) {
+    return 'People'
+  }
+  // Marketing
+  if (t.includes('marketing') || t.includes('growth') || t.includes('community') || t.includes('events') || t.includes('brand') || t.includes('content')) {
+    return 'Marketing'
+  }
+  // Operations
+  if (t.includes('operations') || t.includes('ops ') || t.includes('customer support') || t.includes('customer success') || t.includes('support specialist')) {
+    return 'Operations'
+  }
+  // Finance
+  if (t.includes('finance') || t.includes('contador') || t.includes('accountant') || t.includes('financial') || t.includes('payment')) {
+    return 'Finance'
+  }
+  // Design
+  if (t.includes('design') || t.includes('ux') || t.includes('ui')) {
+    return 'Design'
+  }
+  // Strategy
+  if (t.includes('strategy') || t.includes('chief') || t.includes('head of') || t.includes('director')) {
+    return 'Strategy'
+  }
+  
+  return 'Other'
+}
+
+// Jobs filtered by country
+const filteredJobsByCountry = computed(() => {
+  if (selectedCountry.value === 'all') {
+    return props.jobs
+  }
+  return props.jobs.filter(job => inferCountry(job.title) === selectedCountry.value)
+})
+
+// Count jobs by country
+const countByCountry = computed(() => {
+  const counts = { cl: 0, mx: 0 }
+  for (const job of props.jobs) {
+    const country = inferCountry(job.title)
+    counts[country] = (counts[country] || 0) + 1
+  }
+  return counts
 })
 
 function onDragEnd(stageId, event) {
@@ -153,12 +231,13 @@ const groupedJobs = computed(() => {
   
   // Define department order
   const departmentOrder = [
-    'Engineering', 'People', 'Operations', 'Admin',
-    'Sales', 'Marketing', 'Strategy', 'Finance', 'Other'
+    'Engineering', 'Product', 'Design', 'Sales', 'Marketing',
+    'Operations', 'People', 'Finance', 'Strategy', 'Other'
   ]
   
-  for (const job of props.jobs) {
-    const dept = job.department || 'Sin Departamento'
+  for (const job of filteredJobsByCountry.value) {
+    // Use stored department or infer from title
+    const dept = job.department || inferDepartment(job.title)
     if (!groups[dept]) {
       groups[dept] = []
     }
@@ -168,7 +247,7 @@ const groupedJobs = computed(() => {
   // Sort groups by predefined order, unknown departments at the end
   const sortedGroups = {}
   for (const dept of departmentOrder) {
-    if (groups[dept]) {
+    if (groups[dept] && groups[dept].length > 0) {
       sortedGroups[dept] = groups[dept]
     }
   }
@@ -181,14 +260,6 @@ const groupedJobs = computed(() => {
   
   return sortedGroups
 })
-
-function getCountryFlag(location) {
-  if (!location) return ''
-  const loc = location.toLowerCase()
-  if (loc.includes('chile') || loc.includes('santiago')) return '🇨🇱'
-  if (loc.includes('méx') || loc.includes('mex') || loc.includes('cdmx') || loc.includes('guadalajara') || loc.includes('monterrey')) return '🇲🇽'
-  return ''
-}
 </script>
 
 <template>
@@ -220,18 +291,56 @@ function getCountryFlag(location) {
       </div>
 
       <!-- Job Selector -->
-      <div class="bg-white rounded-lg shadow p-4">
+      <div class="bg-white rounded-lg shadow p-4 space-y-4">
+        <!-- Country Tabs -->
+        <div class="flex gap-2">
+          <button
+            @click="selectedCountry = 'cl'"
+            :class="[
+              'px-4 py-2 rounded-lg font-medium transition-all',
+              selectedCountry === 'cl' 
+                ? 'bg-indigo-600 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ]"
+          >
+            🇨🇱 Chile ({{ countByCountry.cl }})
+          </button>
+          <button
+            @click="selectedCountry = 'mx'"
+            :class="[
+              'px-4 py-2 rounded-lg font-medium transition-all',
+              selectedCountry === 'mx' 
+                ? 'bg-indigo-600 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ]"
+          >
+            🇲🇽 México ({{ countByCountry.mx }})
+          </button>
+          <button
+            @click="selectedCountry = 'all'"
+            :class="[
+              'px-4 py-2 rounded-lg font-medium transition-all',
+              selectedCountry === 'all' 
+                ? 'bg-indigo-600 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ]"
+          >
+            Todos ({{ jobs.length }})
+          </button>
+        </div>
+
+        <!-- Job Dropdown grouped by department -->
         <div class="flex items-center gap-3">
-          <label for="job-filter" class="text-sm font-medium text-gray-700">Viewing pipeline for:</label>
+          <label for="job-filter" class="text-sm font-medium text-gray-700 whitespace-nowrap">Seleccionar rol:</label>
           <select
             id="job-filter"
             v-model="selectedJob"
             @change="filterByJob"
-            class="flex-1 max-w-2xl px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <optgroup v-for="(jobsList, dept) in groupedJobs" :key="dept" :label="dept">
               <option v-for="job in jobsList" :key="job.id" :value="job.id">
-                {{ getCountryFlag(job.location) }} {{ job.title }} ({{ job.applicationCount }})
+                {{ job.title }} ({{ job.applicationCount }})
               </option>
             </optgroup>
           </select>
