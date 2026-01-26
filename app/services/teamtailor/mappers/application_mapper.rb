@@ -35,6 +35,7 @@ module Teamtailor
         should_fetch_answers = is_new_application || !skip_answers
 
         if should_fetch_answers
+          Rails.logger.info("ApplicationMapper: Fetching answers for app #{application.id} (new=#{is_new_application})")
           apply_cover_letter!(application, attributes)
           apply_answers!(application, payload, included_index, client: client)
         end
