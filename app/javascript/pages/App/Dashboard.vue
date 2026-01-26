@@ -4,8 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 
 defineProps({
   recentApplications: Array,
-  stages: Array,
-  applicationsByStage: Object,
+  canonicalStages: Array,
   stats: Object,
   currentUser: Object
 })
@@ -44,9 +43,9 @@ defineProps({
         <div class="p-6">
           <div class="flex gap-4 overflow-x-auto">
             <div 
-              v-for="stage in stages" 
-              :key="stage.id"
-              class="flex-shrink-0 w-32 text-center p-4 rounded-lg"
+              v-for="stage in canonicalStages" 
+              :key="stage.canonical"
+              class="flex-shrink-0 w-28 text-center p-4 rounded-lg"
               :class="{
                 'bg-green-50': stage.kind === 'hired',
                 'bg-red-50': stage.kind === 'rejected',
@@ -58,7 +57,7 @@ defineProps({
                 'text-red-600': stage.kind === 'rejected',
                 'text-gray-900': stage.kind === 'active'
               }">
-                {{ applicationsByStage[stage.id] || 0 }}
+                {{ stage.count }}
               </div>
               <div class="text-sm text-gray-600 mt-1">{{ stage.name }}</div>
             </div>

@@ -19,8 +19,9 @@ module Teamtailor
         application.job_posting = job_posting
         application.candidate = candidate
         application.current_stage = stage if stage.present?
-        application.source = Utils.attr(attributes, "source")
-        application.utm_source = Utils.attr(attributes, "utm_source", "utm-source")
+        # Teamtailor uses referring-site and referring-url instead of source/utm_source
+        application.source = Utils.attr(attributes, "referring-site", "referring_site", "source")
+        application.utm_source = Utils.attr(attributes, "referring-url", "referring_url", "utm_source", "utm-source")
         application.utm_medium = Utils.attr(attributes, "utm_medium", "utm-medium")
         application.utm_campaign = Utils.attr(attributes, "utm_campaign", "utm-campaign")
         application.utm_term = Utils.attr(attributes, "utm_term", "utm-term")
