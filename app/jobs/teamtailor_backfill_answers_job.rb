@@ -12,12 +12,13 @@ class TeamtailorBackfillAnswersJob < ApplicationJob
     
     client = Teamtailor::Client.new
     
-    # Find applications needing answer sync
+    # Find applications needing answer sync (most recent first)
     apps_without_answers = Application
       .where(teamtailor_full_sync_at: nil)
       .where.not(teamtailor_id: nil)
       .joins(:job_posting)
       .where.not(job_postings: { teamtailor_id: nil })
+      .order(created_at: :desc)
       .limit(BATCH_SIZE)
     
     Rails.logger.info("TeamtailorBackfillAnswersJob: Processing #{apps_without_answers.count} applications")

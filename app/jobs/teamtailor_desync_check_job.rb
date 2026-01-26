@@ -17,6 +17,7 @@ class TeamtailorDesyncCheckJob < ApplicationJob
       .where.not(teamtailor_id: nil)
       .joins(:job_posting)
       .where.not(job_postings: { teamtailor_id: nil })
+      .order(created_at: :desc)
       .limit(BATCH_SIZE)
 
     Rails.logger.info("TeamtailorDesyncCheckJob: Processing #{apps_needing_answers.count} applications")
