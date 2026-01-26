@@ -28,6 +28,7 @@ module App
 
     def create
       @job = JobPosting.new(job_params)
+      ensure_department_exists(job_params[:department])
 
       if @job.save
         redirect_to app_job_path(@job), notice: "Job posting created successfully"
@@ -46,6 +47,8 @@ module App
     end
 
     def update
+      ensure_department_exists(job_params[:department])
+
       if @job.update(job_params)
         redirect_to app_job_path(@job), notice: "Job posting updated successfully"
       else
@@ -90,6 +93,15 @@ module App
 
     def job_params
       params.require(:job_posting).permit(:title, :description, :department, :location, :slug)
+    end
+
+    def ensure_department_exists(department_name)
+      return if department_name.blank?
+
+      departments = Setting.departments
+      unless departments.include?(department_name)
+        Setting.departments = departments + [department_name]
+      end
     end
 
     def serialize_job(job)

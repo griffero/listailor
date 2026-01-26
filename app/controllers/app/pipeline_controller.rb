@@ -26,6 +26,8 @@ module App
         jobs: JobPosting.where.not(teamtailor_id: nil).ordered.map { |job| { 
           id: job.id, 
           title: job.title,
+          department: job.department,
+          location: job.location,
           applicationCount: job.applications.count
         } },
         selectedJobId: @job_filter

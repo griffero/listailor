@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import draggable from 'vuedraggable'
@@ -146,6 +146,49 @@ function filterByJob() {
     preserveScroll: true
   })
 }
+
+// Group jobs by department for the dropdown
+const groupedJobs = computed(() => {
+  const groups = {}
+  
+  // Define department order
+  const departmentOrder = [
+    'Engineering', 'People', 'Operations', 'Admin',
+    'Sales', 'Marketing', 'Strategy', 'Finance', 'Other'
+  ]
+  
+  for (const job of props.jobs) {
+    const dept = job.department || 'Sin Departamento'
+    if (!groups[dept]) {
+      groups[dept] = []
+    }
+    groups[dept].push(job)
+  }
+  
+  // Sort groups by predefined order, unknown departments at the end
+  const sortedGroups = {}
+  for (const dept of departmentOrder) {
+    if (groups[dept]) {
+      sortedGroups[dept] = groups[dept]
+    }
+  }
+  // Add remaining departments not in the predefined order
+  for (const dept of Object.keys(groups)) {
+    if (!sortedGroups[dept]) {
+      sortedGroups[dept] = groups[dept]
+    }
+  }
+  
+  return sortedGroups
+})
+
+function getCountryFlag(location) {
+  if (!location) return ''
+  const loc = location.toLowerCase()
+  if (loc.includes('chile') || loc.includes('santiago')) return '🇨🇱'
+  if (loc.includes('méx') || loc.includes('mex') || loc.includes('cdmx') || loc.includes('guadalajara') || loc.includes('monterrey')) return '🇲🇽'
+  return ''
+}
 </script>
 
 <template>
@@ -186,9 +229,11 @@ function filterByJob() {
             @change="filterByJob"
             class="flex-1 max-w-2xl px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option v-for="job in jobs" :key="job.id" :value="job.id">
-              {{ job.title }} ({{ job.applicationCount }} applications)
-            </option>
+            <optgroup v-for="(jobsList, dept) in groupedJobs" :key="dept" :label="dept">
+              <option v-for="job in jobsList" :key="job.id" :value="job.id">
+                {{ getCountryFlag(job.location) }} {{ job.title }} ({{ job.applicationCount }})
+              </option>
+            </optgroup>
           </select>
         </div>
       </div>
