@@ -14,6 +14,8 @@ module Teamtailor
         return nil if job_posting.blank? || candidate.blank?
 
         application = Application.find_or_initialize_by(teamtailor_id: teamtailor_id)
+        is_new_application = application.new_record?
+
         application.job_posting = job_posting
         application.candidate = candidate
         application.current_stage = stage if stage.present?
@@ -24,18 +26,26 @@ module Teamtailor
         application.utm_term = Utils.attr(attributes, "utm_term", "utm-term")
         application.utm_content = Utils.attr(attributes, "utm_content", "utm-content")
 
-        application.created_at = Utils.parse_time(Utils.attr(attributes, "created_at", "created-at")) if application.new_record?
+        application.created_at = Utils.parse_time(Utils.attr(attributes, "created_at", "created-at")) if is_new_application
 
         application.save!
 
-        unless skip_answers
+        # For NEW applications, always fetch answers immediately (few seconds)
+        # For existing applications, respect skip_answers flag
+        should_fetch_answers = is_new_application || !skip_answers
+
+        if should_fetch_answers
           apply_cover_letter!(application, attributes)
           apply_answers!(application, payload, included_index, client: client)
         end
+
         sync_stage_transition!(application, stage, attributes)
         state_synced_at = Utils.parse_time(Utils.attr(attributes, "updated_at", "updated-at")) || Time.current
         application.mark_teamtailor_state_synced!(synced_at: state_synced_at)
-        application.mark_teamtailor_full_sync_if_ready!(synced_at: state_synced_at) unless skip_answers
+
+        if should_fetch_answers
+          application.mark_teamtailor_full_sync!(synced_at: state_synced_at)
+        end
 
         application
       end
