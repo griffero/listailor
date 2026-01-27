@@ -120,6 +120,7 @@ module App
         },
         stage: app.current_stage ? { id: app.current_stage.id, name: app.current_stage.name, kind: app.current_stage.kind } : nil,
         source: app.source,
+        countryFlag: CountryHelper.flag_from_title(app.job_posting.title),
         university: app.education&.dig("university", "name"),
         hasStartupExperience: app.has_startup_experience,
         hasYearTenure: app.has_year_tenure,

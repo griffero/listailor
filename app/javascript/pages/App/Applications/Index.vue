@@ -106,6 +106,7 @@ function getInitials(name) {
           <tr>
             <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Candidate</th>
             <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Job</th>
+            <th class="px-3 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider w-12">País</th>
             <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">University</th>
             <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Insights</th>
             <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Stage</th>
@@ -129,6 +130,9 @@ function getInitials(name) {
             <Link :href="`/app/jobs/${app.job.id}`" class="text-sm text-zinc-600 hover:text-zinc-900 transition-colors">
               {{ app.job.title }}
             </Link>
+          </td>
+          <td class="px-3 py-4 text-center text-lg">
+            {{ app.countryFlag }}
           </td>
           <td class="px-6 py-4">
             <span v-if="app.university" class="text-sm text-zinc-600">{{ app.university }}</span>
@@ -179,7 +183,7 @@ function getInitials(name) {
         </tr>
         
         <tr v-if="applications.length === 0">
-          <td colspan="6">
+          <td colspan="7">
             <UiEmptyState 
               title="No applications found"
               description="Try adjusting your filters or add a new application"

@@ -222,6 +222,7 @@ function getInitials(name) {
             <tr>
               <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Candidate</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Job</th>
+              <th class="px-3 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider w-12">País</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">University</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Insights</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Stage</th>
@@ -245,6 +246,9 @@ function getInitials(name) {
               <Link :href="`/app/jobs/${app.job.id}`" class="text-sm text-zinc-600 hover:text-zinc-900 transition-colors">
                 {{ app.job.title }}
               </Link>
+            </td>
+            <td class="px-3 py-4 text-center text-lg">
+              {{ app.countryFlag }}
             </td>
             <td class="px-6 py-4">
               <span v-if="app.university" class="text-sm text-zinc-600">{{ app.university }}</span>
@@ -295,7 +299,7 @@ function getInitials(name) {
           </tr>
           
           <tr v-if="recentApplications.length === 0">
-            <td colspan="6" class="px-6 py-12 text-center">
+            <td colspan="7" class="px-6 py-12 text-center">
               <div class="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />

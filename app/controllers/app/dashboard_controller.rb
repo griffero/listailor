@@ -121,6 +121,7 @@ module App
           kind: app.current_stage.kind,
           canonical: app.current_stage.canonical_stage
         } : nil,
+        countryFlag: CountryHelper.flag_from_title(app.job_posting.title),
         university: app.education&.dig("university", "name"),
         hasStartupExperience: app.has_startup_experience,
         hasYearTenure: app.has_year_tenure,
