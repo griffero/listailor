@@ -142,30 +142,36 @@ function getInitials(name) {
             <div class="flex items-center gap-1">
               <span 
                 v-if="app.hasStartupExperience" 
-                class="inline-flex items-center justify-center w-6 h-6 rounded bg-violet-100 text-violet-600"
-                title="Experiencia en startups"
+                class="group relative inline-flex items-center justify-center w-6 h-6 rounded bg-violet-100 text-violet-600 cursor-help"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
+                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-zinc-900 rounded shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150">
+                  Experiencia en startups
+                </span>
               </span>
               <span 
                 v-if="app.hasYearTenure" 
-                class="inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100 text-emerald-600"
-                title="+1 año en algún rol"
+                class="group relative inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100 text-emerald-600 cursor-help"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
+                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-zinc-900 rounded shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150">
+                  +1 año en algún rol
+                </span>
               </span>
               <span 
                 v-if="app.hasPersonalProjects" 
-                class="inline-flex items-center justify-center w-6 h-6 rounded bg-amber-100 text-amber-600"
-                title="Proyectos propios"
+                class="group relative inline-flex items-center justify-center w-6 h-6 rounded bg-amber-100 text-amber-600 cursor-help"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
+                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-zinc-900 rounded shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150">
+                  Proyectos propios
+                </span>
               </span>
               <span v-if="!app.hasStartupExperience && !app.hasYearTenure && !app.hasPersonalProjects" class="text-zinc-300">—</span>
             </div>
