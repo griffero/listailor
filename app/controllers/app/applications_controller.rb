@@ -1,6 +1,6 @@
 module App
   class ApplicationsController < BaseController
-    before_action :set_application, only: [:show, :move_stage]
+    before_action :set_application, only: [:show, :move_stage, :toggle_stage_completion]
 
     def index
       @applications = Application.includes(:candidate, :job_posting, :current_stage)
@@ -92,6 +92,16 @@ module App
       end
     end
 
+    def toggle_stage_completion
+      stage = PipelineStage.find(params[:stage_id])
+      completed = @application.toggle_stage_completion!(stage.id)
+
+      respond_to do |format|
+        format.html { redirect_to app_application_path(@application) }
+        format.json { render json: { completed: completed, stageId: stage.id } }
+      end
+    end
+
     private
 
     def set_application
@@ -141,6 +151,7 @@ module App
         hasYearTenure: app.has_year_tenure,
         hasPersonalProjects: app.has_personal_projects,
         processingCompleted: app.processing_completed_at.present?,
+        completedStageIds: app.completed_stage_ids,
         answers: app.application_answers.ordered.map do |answer|
           {
             question: answer.question_label,

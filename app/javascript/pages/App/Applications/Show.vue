@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { UiCard, UiBadge, UiButton, UiSelect } from '@/components/ui'
@@ -14,6 +14,8 @@ const props = defineProps({
 
 const newNote = ref('')
 const selectedStage = ref(props.application.stage?.id)
+const completedStages = reactive(new Set(props.application.completedStageIds || []))
+const togglingStage = ref(null)
 
 function moveStage() {
   if (!selectedStage.value || selectedStage.value === props.application.stage?.id) return
@@ -21,6 +23,32 @@ function moveStage() {
   router.post(`/app/applications/${props.application.id}/move_stage`, {
     stage_id: selectedStage.value
   })
+}
+
+function toggleStageCompletion(stageId) {
+  if (togglingStage.value) return
+  togglingStage.value = stageId
+  
+  router.post(`/app/applications/${props.application.id}/toggle_stage_completion`, {
+    stage_id: stageId
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      if (completedStages.has(stageId)) {
+        completedStages.delete(stageId)
+      } else {
+        completedStages.add(stageId)
+      }
+      togglingStage.value = null
+    },
+    onError: () => {
+      togglingStage.value = null
+    }
+  })
+}
+
+function isStageCompleted(stageId) {
+  return completedStages.has(stageId)
 }
 
 function addNote() {
@@ -147,6 +175,50 @@ function getInitials(name) {
               >
                 Move
               </UiButton>
+            </div>
+          </UiCard>
+
+          <!-- Stage Checklist -->
+          <UiCard>
+            <h2 class="text-base font-semibold text-zinc-900 mb-4">Stage Checklist</h2>
+            <p class="text-xs text-zinc-500 mb-4">Mark stages as done independently of the current stage</p>
+            <div class="space-y-2">
+              <label 
+                v-for="stage in stages" 
+                :key="stage.id"
+                class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-50 transition-colors cursor-pointer group"
+                :class="{ 'opacity-50': togglingStage === stage.id }"
+              >
+                <input
+                  type="checkbox"
+                  :checked="isStageCompleted(stage.id)"
+                  @change="toggleStageCompletion(stage.id)"
+                  :disabled="togglingStage === stage.id"
+                  class="w-4 h-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0"
+                />
+                <span 
+                  class="flex-1 text-sm transition-colors"
+                  :class="isStageCompleted(stage.id) ? 'text-zinc-400 line-through' : 'text-zinc-700'"
+                >
+                  {{ stage.name }}
+                </span>
+                <UiBadge 
+                  v-if="stage.id === application.stage?.id" 
+                  variant="info" 
+                  size="sm"
+                >
+                  Current
+                </UiBadge>
+                <svg 
+                  v-else-if="isStageCompleted(stage.id)" 
+                  class="w-4 h-4 text-emerald-500" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </label>
             </div>
           </UiCard>
 

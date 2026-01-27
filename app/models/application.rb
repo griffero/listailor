@@ -8,6 +8,7 @@ class Application < ApplicationRecord
   has_many :events, class_name: "ApplicationEvent", dependent: :destroy
   has_many :email_messages, dependent: :destroy
   has_many :interview_events, dependent: :destroy
+  has_many :completed_stages, dependent: :destroy
 
   has_one_attached :cv
 
@@ -162,6 +163,25 @@ class Application < ApplicationRecord
 
     mark_teamtailor_full_sync!(synced_at: synced_at)
     true
+  end
+
+  def stage_completed?(stage_id)
+    completed_stages.exists?(pipeline_stage_id: stage_id)
+  end
+
+  def toggle_stage_completion!(stage_id)
+    existing = completed_stages.find_by(pipeline_stage_id: stage_id)
+    if existing
+      existing.destroy!
+      false
+    else
+      completed_stages.create!(pipeline_stage_id: stage_id)
+      true
+    end
+  end
+
+  def completed_stage_ids
+    completed_stages.pluck(:pipeline_stage_id)
   end
 
   private

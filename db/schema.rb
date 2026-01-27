@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_27_191902) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_27_202344) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -123,6 +123,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_191902) do
     t.string "teamtailor_id"
     t.index "lower((email)::text)", name: "index_candidates_on_lower_email", unique: true
     t.index ["teamtailor_id"], name: "index_candidates_on_teamtailor_id", unique: true
+  end
+
+  create_table "completed_stages", force: :cascade do |t|
+    t.bigint "application_id", null: false
+    t.bigint "pipeline_stage_id", null: false
+    t.datetime "completed_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["application_id", "pipeline_stage_id"], name: "index_completed_stages_on_application_id_and_pipeline_stage_id", unique: true
+    t.index ["application_id"], name: "index_completed_stages_on_application_id"
+    t.index ["pipeline_stage_id"], name: "index_completed_stages_on_pipeline_stage_id"
   end
 
   create_table "email_messages", force: :cascade do |t|
@@ -414,6 +425,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_191902) do
   add_foreign_key "applications", "candidates"
   add_foreign_key "applications", "job_postings"
   add_foreign_key "applications", "pipeline_stages", column: "current_stage_id"
+  add_foreign_key "completed_stages", "applications"
+  add_foreign_key "completed_stages", "pipeline_stages"
   add_foreign_key "email_messages", "applications"
   add_foreign_key "email_templates", "users", column: "created_by_user_id"
   add_foreign_key "interview_events", "applications"
