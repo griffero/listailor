@@ -8,7 +8,10 @@ module Teamtailor
         teamtailor_id = payload["id"]
 
         job_posting = resolve_job(payload, included_index, client: client)
-        candidate = resolve_candidate(payload, included_index, client: client)
+        candidate_result = resolve_candidate_with_resume(payload, included_index, client: client)
+        candidate = candidate_result[:candidate]
+        resume_url = candidate_result[:resume_url]
+        resume_filename = candidate_result[:resume_filename]
         stage = resolve_stage(payload, included_index, job_posting: job_posting)
 
         return nil if job_posting.blank? || candidate.blank?
@@ -30,6 +33,11 @@ module Teamtailor
         application.created_at = Utils.parse_time(Utils.attr(attributes, "created_at", "created-at")) if is_new_application
 
         application.save!
+
+        # Download CV from TeamTailor if available and not already attached
+        if resume_url.present? && !application.cv.attached?
+          CvDownloader.download_and_attach(application, url: resume_url, filename: resume_filename)
+        end
 
         # For NEW applications, always fetch answers immediately (few seconds)
         # For existing applications, respect skip_answers flag
@@ -190,27 +198,45 @@ module Teamtailor
         JobPosting.find_by(teamtailor_id: teamtailor_id)
       end
 
-      def self.resolve_candidate(payload, _included_index, client:)
+      def self.resolve_candidate(payload, included_index, client:)
+        resolve_candidate_with_resume(payload, included_index, client: client)[:candidate]
+      end
+
+      def self.resolve_candidate_with_resume(payload, _included_index, client:)
         candidate_ref = payload.dig("relationships", "candidate", "data")
         teamtailor_id = candidate_ref&.fetch("id", nil)
 
-        return nil if teamtailor_id.blank?
+        return { candidate: nil, resume_url: nil, resume_filename: nil } if teamtailor_id.blank?
 
         candidate = Candidate.find_by(teamtailor_id: teamtailor_id)
-        return candidate if candidate.present?
-
+        
+        # Always fetch from API to get resume info (even if candidate exists)
         begin
           response = client.get("/candidates/#{teamtailor_id}")
           data = response["data"]
-          return nil if data.blank?
-
-          Teamtailor::Mappers::CandidateMapper.upsert!(data)
+          
+          if data.present?
+            candidate = Teamtailor::Mappers::CandidateMapper.upsert!(data) if candidate.blank?
+            
+            # Extract resume info from candidate attributes
+            attributes = data.fetch("attributes", {})
+            resume = attributes["resume"] || {}
+            resume_url = resume["url"]
+            resume_filename = resume["file-name"] || resume["filename"]
+            
+            return {
+              candidate: candidate || Candidate.find_by(teamtailor_id: teamtailor_id),
+              resume_url: resume_url,
+              resume_filename: resume_filename
+            }
+          end
         rescue RuntimeError => e
-          return nil if e.message.include?("404")
-          raise
+          unless e.message.include?("404")
+            raise
+          end
         end
 
-        Candidate.find_by(teamtailor_id: teamtailor_id)
+        { candidate: candidate, resume_url: nil, resume_filename: nil }
       end
 
       def self.resolve_stage(payload, included_index, job_posting: nil)
