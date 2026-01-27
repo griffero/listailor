@@ -52,7 +52,7 @@ module App
       return empty_sync_stats if total.zero?
 
       from_teamtailor = Application.where.not(teamtailor_id: nil).count
-      with_cv = Application.joins(:cv_attachment).count
+      with_cv = Application.joins(:cv_attachment).distinct.count
       with_education = Application.where.not(education: nil).count
       with_work_experience = Application.where("work_experience IS NOT NULL AND jsonb_array_length(work_experience) > 0").count
       with_custom_questions = Application.where.not(teamtailor_full_sync_at: nil).count
