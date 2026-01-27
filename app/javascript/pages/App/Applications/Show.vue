@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { UiCard, UiBadge, UiButton, UiSelect } from '@/components/ui'
@@ -16,6 +16,17 @@ const newNote = ref('')
 const selectedStage = ref(props.application.stage?.id)
 const completedStages = reactive(new Set(props.application.completedStageIds || []))
 const togglingStage = ref(null)
+
+// Filter out terminal stages (hired/rejected) and first stage (inbox) from checklist
+const checkableStages = computed(() => {
+  const sorted = [...props.stages].sort((a, b) => a.position - b.position)
+  const firstStageId = sorted[0]?.id
+  return props.stages.filter(stage => 
+    stage.kind !== 'hired' && 
+    stage.kind !== 'rejected' && 
+    stage.id !== firstStageId
+  )
+})
 
 function moveStage() {
   if (!selectedStage.value || selectedStage.value === props.application.stage?.id) return
@@ -179,12 +190,12 @@ function getInitials(name) {
           </UiCard>
 
           <!-- Stage Checklist -->
-          <UiCard>
+          <UiCard v-if="checkableStages.length > 0">
             <h2 class="text-base font-semibold text-zinc-900 mb-4">Stage Checklist</h2>
-            <p class="text-xs text-zinc-500 mb-4">Mark stages as done independently of the current stage</p>
+            <p class="text-xs text-zinc-500 mb-4">Mark interview stages as done</p>
             <div class="space-y-2">
               <label 
-                v-for="stage in stages" 
+                v-for="stage in checkableStages" 
                 :key="stage.id"
                 class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-50 transition-colors cursor-pointer group"
                 :class="{ 'opacity-50': togglingStage === stage.id }"
