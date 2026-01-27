@@ -220,9 +220,11 @@ module Teamtailor
             
             # Extract resume info from candidate attributes
             attributes = data.fetch("attributes", {})
-            resume = attributes["resume"] || {}
-            resume_url = resume["url"]
-            resume_filename = resume["file-name"] || resume["filename"]
+            resume = attributes["resume"]
+            
+            # Resume can be a direct URL string or an object with url/file-name
+            resume_url = resume.is_a?(String) ? resume : resume&.dig("url")
+            resume_filename = resume.is_a?(Hash) ? (resume["file-name"] || resume["filename"]) : nil
             
             return {
               candidate: candidate || Candidate.find_by(teamtailor_id: teamtailor_id),

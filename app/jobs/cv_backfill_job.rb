@@ -46,9 +46,11 @@ class CvBackfillJob < ApplicationJob
       return if data.blank?
 
       attributes = data.fetch("attributes", {})
-      resume = attributes["resume"] || {}
-      resume_url = resume["url"]
-      resume_filename = resume["file-name"] || resume["filename"]
+      resume = attributes["resume"]
+      
+      # Resume can be a direct URL string or an object with url/file-name
+      resume_url = resume.is_a?(String) ? resume : resume&.dig("url")
+      resume_filename = resume.is_a?(Hash) ? (resume["file-name"] || resume["filename"]) : nil
 
       if resume_url.present?
         CvDownloader.download_and_attach(app, url: resume_url, filename: resume_filename)
