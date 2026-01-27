@@ -49,6 +49,9 @@ gem "pdf-reader"
 # OpenAI API client for AI-powered extraction
 gem "ruby-openai"
 
+# AWS S3 SDK for Cloudflare R2 storage (S3-compatible)
+gem "aws-sdk-s3"
+
 group :development, :test do
   # Load environment variables from .env file
   gem "dotenv-rails"
