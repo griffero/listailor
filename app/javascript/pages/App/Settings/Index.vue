@@ -8,8 +8,29 @@ const props = defineProps({
   settings: Object,
   envSettings: Object,
   globalQuestions: Array,
+  members: Array,
   currentUser: Object
 })
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'Never'
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return 'Never'
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
 const form = ref({
   outbound_webhook_url: props.settings.outboundWebhookUrl || '',
@@ -99,6 +120,49 @@ function removeGlobalQuestion(id) {
         title="Settings" 
         description="Configure your ATS settings"
       />
+
+      <!-- Team Members -->
+      <UiCard>
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-base font-semibold text-zinc-900">Team Members</h2>
+            <p class="text-sm text-zinc-500 mt-1">People with @fintoc.com accounts who have signed in</p>
+          </div>
+          <UiBadge variant="outline">{{ members.length }} members</UiBadge>
+        </div>
+
+        <div class="divide-y divide-zinc-100">
+          <div 
+            v-for="member in members" 
+            :key="member.id"
+            class="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-zinc-100 flex items-center justify-center">
+                <span class="text-sm font-medium text-zinc-600">
+                  {{ member.email.charAt(0).toUpperCase() }}
+                </span>
+              </div>
+              <div>
+                <div class="font-medium text-zinc-900 text-sm">{{ member.email }}</div>
+                <div class="text-xs text-zinc-400 font-mono">
+                  Joined {{ formatDate(member.createdAt) }}
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-zinc-500">Last active</div>
+              <div class="text-xs text-zinc-400 font-mono">
+                {{ member.lastSignedInAt ? formatDateTime(member.lastSignedInAt) : 'Never' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="members.length === 0" class="text-center py-8 text-zinc-500 text-sm">
+          No team members yet
+        </div>
+      </UiCard>
 
       <!-- Departments & Locations -->
       <UiCard>

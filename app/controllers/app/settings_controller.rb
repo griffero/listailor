@@ -14,7 +14,8 @@ module App
           n8nSendEmailWebhookUrl: ENV["N8N_SEND_EMAIL_WEBHOOK_URL"],
           embedAllowedOrigins: ENV["EMBED_ALLOWED_ORIGINS"]
         },
-        globalQuestions: GlobalQuestion.ordered.map { |q| serialize_global_question(q) }
+        globalQuestions: GlobalQuestion.ordered.map { |q| serialize_global_question(q) },
+        members: User.order(created_at: :desc).map { |u| serialize_user(u) }
       }
     end
 
@@ -46,6 +47,15 @@ module App
         required: question.required,
         position: question.position,
         options: question.select_options
+      }
+    end
+
+    def serialize_user(user)
+      {
+        id: user.id,
+        email: user.email,
+        createdAt: user.created_at.iso8601,
+        lastSignedInAt: user.last_signed_in_at&.iso8601
       }
     end
   end
