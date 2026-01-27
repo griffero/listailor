@@ -21,7 +21,13 @@ const newStageForm = ref({ name: '', kind: 'active' })
 const isSubmitting = ref(false)
 
 // Country filter state
-const selectedCountry = ref('all')
+const selectedCountry = ref('cl')
+
+// Reset job selection when country changes
+watch(selectedCountry, () => {
+  selectedJob.value = ''
+  filterByJob()
+})
 
 // Sync managed stages when panel opens
 watch(showManagePanel, (open) => {
@@ -225,6 +231,11 @@ function filterByJob() {
   })
 }
 
+// Total application count for filtered jobs
+const totalApplicationCount = computed(() => {
+  return filteredJobsByCountry.value.reduce((sum, job) => sum + (job.applicationCount || 0), 0)
+})
+
 // Group jobs by department for the dropdown
 const groupedJobs = computed(() => {
   const groups = {}
@@ -331,6 +342,7 @@ const groupedJobs = computed(() => {
             @change="filterByJob"
             class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
+            <option value="">Todos los roles ({{ totalApplicationCount }})</option>
             <optgroup v-for="(jobsList, dept) in groupedJobs" :key="dept" :label="dept">
               <option v-for="job in jobsList" :key="job.id" :value="job.id">
                 {{ job.title }} ({{ job.applicationCount }})
