@@ -8,6 +8,10 @@ defineProps({
   variables: Array,
   currentUser: Object
 })
+
+function formatVariable(v) {
+  return `{{${v}}}`
+}
 </script>
 
 <template>
@@ -35,7 +39,7 @@ defineProps({
             v-for="v in variables" 
             :key="v" 
             class="px-2 py-1 bg-zinc-800 rounded text-xs text-emerald-400 font-mono"
-          >{{ '{{' + v + '}}' }}</code>
+          >{{ formatVariable(v) }}</code>
         </div>
       </UiCard>
 
