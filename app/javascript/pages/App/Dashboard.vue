@@ -106,12 +106,12 @@ function getInitials(name) {
         </UiCard>
       </div>
 
-      <!-- Sync Overview -->
+      <!-- TeamTailor Sync Overview -->
       <UiCard padding="none">
         <div class="px-6 py-4 border-b border-zinc-100">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-base font-semibold text-zinc-900">Sync Overview</h2>
+              <h2 class="text-base font-semibold text-zinc-900">TeamTailor Sync Overview</h2>
               <p class="text-sm text-zinc-500 mt-0.5">Data extraction and sync status</p>
             </div>
             <UiBadge v-if="syncStats.pendingExtraction > 0" variant="warning" dot>
