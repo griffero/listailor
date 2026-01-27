@@ -2,7 +2,8 @@
 
 class CoverLetterEvaluator
   DEFAULT_PROMPT = <<~PROMPT.freeze
-    Evaluate this cover letter as if you were a contrarian founder who only hires people with independent thinking.
+    Evaluate this job application as if you were a contrarian founder who only hires people with independent thinking.
+    You will receive all the answers the candidate provided in their application form.
 
     Do NOT comment on writing quality or tone.
 
@@ -20,12 +21,12 @@ class CoverLetterEvaluator
     End with a binary decision: ADVANCE or REJECT.
   PROMPT
 
-  def initialize(cover_letter_text)
-    @cover_letter_text = cover_letter_text
+  def initialize(application_answers_text)
+    @application_answers_text = application_answers_text
   end
 
   def evaluate
-    return nil if @cover_letter_text.blank?
+    return nil if @application_answers_text.blank?
 
     prompt = Setting.get("cover_letter_evaluation_prompt").presence || DEFAULT_PROMPT
 
@@ -39,7 +40,7 @@ class CoverLetterEvaluator
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: prompt },
-          { role: "user", content: "COVER LETTER:\n\n#{@cover_letter_text}" }
+          { role: "user", content: "APPLICATION ANSWERS:\n\n#{@application_answers_text}" }
         ],
         temperature: 0.3
       }

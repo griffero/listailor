@@ -123,15 +123,20 @@ class EducationExtractionJob < ApplicationJob
     # Skip if already evaluated
     return nil if app.cover_letter_decision.present?
 
-    # Find cover letter from application answers
-    cover_letter_question = GlobalQuestion.find_by(label: "Cover Letter (Teamtailor)")
-    return nil unless cover_letter_question
+    # Get all application answers
+    answers = app.application_answers.includes(:global_question).ordered
+    return nil if answers.empty?
 
-    cover_letter_answer = app.application_answers.find_by(global_question_id: cover_letter_question.id)
-    return nil if cover_letter_answer.blank? || cover_letter_answer.value.blank?
+    # Format all answers for evaluation
+    answers_text = answers.map do |answer|
+      next if answer.value.blank?
+      "**#{answer.question_label}**\n#{answer.value}"
+    end.compact.join("\n\n")
 
-    # Evaluate using AI
-    CoverLetterEvaluator.new(cover_letter_answer.value).evaluate
+    return nil if answers_text.blank?
+
+    # Evaluate using AI with all answers
+    CoverLetterEvaluator.new(answers_text).evaluate
   rescue StandardError => e
     Rails.logger.warn("EducationExtractionJob: Cover letter evaluation failed for app #{app.id}: #{e.message}")
     nil
