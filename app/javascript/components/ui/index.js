@@ -1,0 +1,10 @@
+// UI Components barrel export
+export { default as UiButton } from './UiButton.vue'
+export { default as UiCard } from './UiCard.vue'
+export { default as UiBadge } from './UiBadge.vue'
+export { default as UiInput } from './UiInput.vue'
+export { default as UiSelect } from './UiSelect.vue'
+export { default as UiStatCard } from './UiStatCard.vue'
+export { default as UiPageHeader } from './UiPageHeader.vue'
+export { default as UiEmptyState } from './UiEmptyState.vue'
+export { default as UiTable } from './UiTable.vue'

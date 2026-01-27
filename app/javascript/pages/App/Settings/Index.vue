@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { UiCard, UiPageHeader, UiBadge, UiButton, UiInput, UiSelect } from '@/components/ui'
 
 const props = defineProps({
   settings: Object,
@@ -93,28 +94,30 @@ function removeGlobalQuestion(id) {
 
 <template>
   <AppLayout :currentUser="currentUser">
-    <div class="max-w-3xl mx-auto space-y-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
-        <p class="text-gray-600">Configure your ATS settings</p>
-      </div>
+    <div class="max-w-3xl mx-auto space-y-8">
+      <UiPageHeader 
+        title="Settings" 
+        description="Configure your ATS settings"
+      />
 
       <!-- Departments & Locations -->
-      <div class="bg-white rounded-lg shadow p-6 space-y-6">
-        <h2 class="text-lg font-semibold text-gray-900">Job Configuration</h2>
+      <UiCard>
+        <h2 class="text-base font-semibold text-zinc-900 mb-6">Job Configuration</h2>
 
         <!-- Departments -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Departments</label>
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-zinc-700 mb-2">Departments</label>
           <div v-if="form.departments.length > 0" class="flex flex-wrap gap-2 mb-3">
             <span 
               v-for="(dept, index) in form.departments" 
               :key="index"
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800"
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-zinc-100 text-zinc-700"
             >
               {{ dept }}
-              <button @click="removeDepartment(index)" class="ml-2 text-indigo-600 hover:text-indigo-900">
-                &times;
+              <button @click="removeDepartment(index)" class="ml-2 text-zinc-500 hover:text-zinc-900 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </span>
           </div>
@@ -124,30 +127,26 @@ function removeGlobalQuestion(id) {
               type="text"
               placeholder="Add department..."
               @keyup.enter="addDepartment"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="flex-1 px-3 py-2 text-sm border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-colors"
             >
-            <button 
-              @click="addDepartment"
-              type="button"
-              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-            >
-              Add
-            </button>
+            <UiButton @click="addDepartment" variant="secondary">Add</UiButton>
           </div>
         </div>
 
         <!-- Locations -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Locations</label>
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-zinc-700 mb-2">Locations</label>
           <div v-if="form.locations.length > 0" class="flex flex-wrap gap-2 mb-3">
             <span 
               v-for="(loc, index) in form.locations" 
               :key="index"
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-50 text-emerald-700"
             >
               {{ loc }}
-              <button @click="removeLocation(index)" class="ml-2 text-green-600 hover:text-green-900">
-                &times;
+              <button @click="removeLocation(index)" class="ml-2 text-emerald-600 hover:text-emerald-900 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </span>
           </div>
@@ -157,180 +156,150 @@ function removeGlobalQuestion(id) {
               type="text"
               placeholder="Add location..."
               @keyup.enter="addLocation"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="flex-1 px-3 py-2 text-sm border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-colors"
             >
-            <button 
-              @click="addLocation"
-              type="button"
-              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-            >
-              Add
-            </button>
+            <UiButton @click="addLocation" variant="secondary">Add</UiButton>
           </div>
         </div>
 
-        <div class="flex justify-end pt-4 border-t">
-          <button 
-            @click="submit"
-            type="button"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-          >
-            Save Departments & Locations
-          </button>
+        <div class="flex justify-end pt-4 border-t border-zinc-100">
+          <UiButton @click="submit">Save Departments & Locations</UiButton>
         </div>
-      </div>
+      </UiCard>
 
       <!-- Global Questions -->
-      <div class="bg-white rounded-lg shadow p-6 space-y-6">
-        <div>
-          <h2 class="text-lg font-semibold text-gray-900">Global Application Questions</h2>
-          <p class="text-sm text-gray-500 mt-1">These questions will appear in all job applications</p>
+      <UiCard>
+        <div class="mb-6">
+          <h2 class="text-base font-semibold text-zinc-900">Global Application Questions</h2>
+          <p class="text-sm text-zinc-500 mt-1">These questions will appear in all job applications</p>
         </div>
 
         <!-- Existing Global Questions -->
-        <div v-if="globalQuestions && globalQuestions.length > 0" class="space-y-3">
-          <div v-for="q in globalQuestions" :key="q.id" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div>
-              <span class="font-medium">{{ q.label }}</span>
-              <span v-if="q.required" class="text-red-500 ml-1">*</span>
-              <span class="text-sm text-gray-500 ml-2">({{ q.kind }})</span>
+        <div v-if="globalQuestions && globalQuestions.length > 0" class="space-y-2 mb-6">
+          <div v-for="q in globalQuestions" :key="q.id" class="flex items-center justify-between p-3 bg-zinc-50 rounded-lg">
+            <div class="flex items-center gap-2">
+              <span class="font-medium text-zinc-900">{{ q.label }}</span>
+              <UiBadge v-if="q.required" variant="danger" size="sm">Required</UiBadge>
+              <UiBadge variant="outline" size="sm">{{ q.kind }}</UiBadge>
             </div>
-            <button @click="removeGlobalQuestion(q.id)" class="text-red-600 hover:text-red-800 text-sm">
-              Remove
+            <button @click="removeGlobalQuestion(q.id)" class="text-zinc-400 hover:text-red-600 transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
             </button>
           </div>
         </div>
 
         <!-- Add Global Question -->
-        <div class="border-t pt-6">
-          <h3 class="text-sm font-medium text-gray-700 mb-4">Add Global Question</h3>
+        <div class="border-t border-zinc-100 pt-6">
+          <h3 class="text-sm font-medium text-zinc-700 mb-4">Add Global Question</h3>
           <div class="space-y-4">
-            <div>
-              <input 
-                v-model="newQuestion.label"
-                type="text"
-                placeholder="Question text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-            </div>
+            <UiInput 
+              v-model="newQuestion.label"
+              placeholder="Question text"
+            />
             <div class="grid grid-cols-2 gap-4">
-              <div>
-                <select 
-                  v-model="newQuestion.kind"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="long_text">Long Text</option>
-                  <option value="short_text">Short Text</option>
-                  <option value="number">Number</option>
-                  <option value="checkbox">Checkbox</option>
-                  <option value="select">Select</option>
-                </select>
-              </div>
+              <UiSelect v-model="newQuestion.kind">
+                <option value="long_text">Long Text</option>
+                <option value="short_text">Short Text</option>
+                <option value="number">Number</option>
+                <option value="checkbox">Checkbox</option>
+                <option value="select">Select</option>
+              </UiSelect>
               <div class="flex items-center">
-                <label class="flex items-center">
-                  <input type="checkbox" v-model="newQuestion.required" class="rounded border-gray-300 text-indigo-600">
-                  <span class="ml-2 text-sm text-gray-700">Required</span>
+                <label class="flex items-center cursor-pointer">
+                  <input type="checkbox" v-model="newQuestion.required" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900">
+                  <span class="ml-2 text-sm text-zinc-700">Required</span>
                 </label>
               </div>
             </div>
-            <div v-if="newQuestion.kind === 'select'">
-              <input 
-                v-model="newQuestion.options"
-                type="text"
-                placeholder="Options (comma separated)"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-            </div>
-            <button 
-              @click="addGlobalQuestion"
-              type="button"
-              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-            >
+            <UiInput 
+              v-if="newQuestion.kind === 'select'"
+              v-model="newQuestion.options"
+              placeholder="Options (comma separated)"
+            />
+            <UiButton @click="addGlobalQuestion" variant="secondary">
               Add Global Question
-            </button>
+            </UiButton>
           </div>
         </div>
-      </div>
+      </UiCard>
 
       <!-- Webhooks -->
-      <form @submit.prevent="submit" class="bg-white rounded-lg shadow p-6 space-y-6">
-        <h2 class="text-lg font-semibold text-gray-900">Webhooks & Integrations</h2>
+      <UiCard>
+        <h2 class="text-base font-semibold text-zinc-900 mb-6">Webhooks & Integrations</h2>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Outbound Webhook URL</label>
-          <input 
-            v-model="form.outbound_webhook_url"
-            type="url"
-            placeholder="https://n8n.example.com/webhook/..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-          <p class="text-xs text-gray-500 mt-1">
-            Receives POST for new applications.
-            <span v-if="envSettings.outboundWebhookUrl" class="text-indigo-600">
-              ENV fallback: {{ envSettings.outboundWebhookUrl.substring(0, 50) }}...
-            </span>
-          </p>
-        </div>
+        <div class="space-y-6">
+          <div>
+            <UiInput 
+              v-model="form.outbound_webhook_url"
+              label="Outbound Webhook URL"
+              placeholder="https://n8n.example.com/webhook/..."
+              :hint="envSettings.outboundWebhookUrl ? `ENV fallback: ${envSettings.outboundWebhookUrl.substring(0, 50)}...` : 'Receives POST for new applications'"
+            />
+          </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">n8n Send Email Webhook URL</label>
-          <input 
-            v-model="form.n8n_send_email_webhook_url"
-            type="url"
-            placeholder="https://n8n.example.com/webhook/..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-          <p class="text-xs text-gray-500 mt-1">
-            n8n will receive email send requests here.
-          </p>
-        </div>
+          <div>
+            <UiInput 
+              v-model="form.n8n_send_email_webhook_url"
+              label="n8n Send Email Webhook URL"
+              placeholder="https://n8n.example.com/webhook/..."
+              hint="n8n will receive email send requests here"
+            />
+          </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Embed Allowed Origins</label>
-          <input 
-            v-model="form.embed_allowed_origins"
-            type="text"
-            placeholder="https://fintoc.com,https://www.fintoc.com"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-          <p class="text-xs text-gray-500 mt-1">
-            Comma-separated list of origins allowed to embed the jobs widget.
-          </p>
-        </div>
+          <div>
+            <UiInput 
+              v-model="form.embed_allowed_origins"
+              label="Embed Allowed Origins"
+              placeholder="https://fintoc.com,https://www.fintoc.com"
+              hint="Comma-separated list of origins allowed to embed the jobs widget"
+            />
+          </div>
 
-        <div class="flex justify-end pt-4">
-          <button 
-            type="submit"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-          >
-            Save Settings
-          </button>
+          <div class="flex justify-end pt-4 border-t border-zinc-100">
+            <UiButton @click="submit">Save Settings</UiButton>
+          </div>
         </div>
-      </form>
+      </UiCard>
 
       <!-- API Info -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">API Information</h2>
-        <div class="space-y-4 text-sm">
+      <UiCard>
+        <h2 class="text-base font-semibold text-zinc-900 mb-6">API Information</h2>
+        <div class="space-y-6 text-sm">
           <div>
-            <h3 class="font-medium text-gray-700">API Base URL</h3>
-            <code class="text-gray-600">/api/v1</code>
+            <h3 class="font-medium text-zinc-700 mb-1">API Base URL</h3>
+            <code class="px-2 py-1 bg-zinc-100 rounded text-zinc-800 font-mono text-xs">/api/v1</code>
           </div>
           <div>
-            <h3 class="font-medium text-gray-700">Authentication</h3>
-            <p class="text-gray-600">Bearer token via <code>N8N_API_TOKEN</code> environment variable</p>
-            <code class="block mt-1 p-2 bg-gray-100 rounded">Authorization: Bearer YOUR_TOKEN</code>
+            <h3 class="font-medium text-zinc-700 mb-2">Authentication</h3>
+            <p class="text-zinc-600 mb-2">Bearer token via <code class="px-1.5 py-0.5 bg-zinc-100 rounded font-mono text-xs">N8N_API_TOKEN</code> environment variable</p>
+            <div class="bg-zinc-900 rounded-lg p-3 font-mono text-xs text-zinc-300">
+              Authorization: Bearer YOUR_TOKEN
+            </div>
           </div>
           <div>
-            <h3 class="font-medium text-gray-700">Available Endpoints</h3>
-            <ul class="list-disc list-inside text-gray-600 space-y-1 mt-2">
-              <li><code>POST /api/v1/application_events</code> - Create timeline events</li>
-              <li><code>POST /api/v1/email_messages</code> - Upsert email messages</li>
-              <li><code>POST /api/v1/interviews</code> - Create interview events</li>
-            </ul>
+            <h3 class="font-medium text-zinc-700 mb-2">Available Endpoints</h3>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <UiBadge variant="success" size="sm">POST</UiBadge>
+                <code class="font-mono text-xs text-zinc-600">/api/v1/application_events</code>
+                <span class="text-xs text-zinc-400">Create timeline events</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UiBadge variant="success" size="sm">POST</UiBadge>
+                <code class="font-mono text-xs text-zinc-600">/api/v1/email_messages</code>
+                <span class="text-xs text-zinc-400">Upsert email messages</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UiBadge variant="success" size="sm">POST</UiBadge>
+                <code class="font-mono text-xs text-zinc-600">/api/v1/interviews</code>
+                <span class="text-xs text-zinc-400">Create interview events</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </UiCard>
     </div>
   </AppLayout>
 </template>

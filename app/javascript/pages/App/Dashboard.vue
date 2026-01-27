@@ -1,6 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { UiCard, UiStatCard, UiPageHeader, UiBadge, UiButton } from '@/components/ui'
 
 defineProps({
   recentApplications: Array,
@@ -9,173 +10,248 @@ defineProps({
   syncStats: Object,
   currentUser: Object
 })
+
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+function formatNumber(num) {
+  return num?.toLocaleString() || '0'
+}
+
+function getSyncVariant(pct) {
+  if (pct >= 80) return 'success'
+  if (pct >= 50) return 'warning'
+  return 'danger'
+}
 </script>
 
 <template>
   <AppLayout :currentUser="currentUser">
-    <div class="space-y-6">
+    <div class="space-y-8">
       <!-- Header -->
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p class="text-gray-600">Welcome to Listailor ATS</p>
-      </div>
+      <UiPageHeader 
+        title="Dashboard" 
+        description="Overview of your hiring pipeline"
+      >
+        <template #actions>
+          <UiButton href="/app/applications/new">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Application
+          </UiButton>
+        </template>
+      </UiPageHeader>
 
-      <!-- Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="text-sm font-medium text-gray-500">Total Applications</div>
-          <div class="text-3xl font-bold text-gray-900 mt-1">{{ stats.totalApplications }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="text-sm font-medium text-gray-500">Active Jobs</div>
-          <div class="text-3xl font-bold text-gray-900 mt-1">{{ stats.totalJobs }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="text-sm font-medium text-gray-500">This Week</div>
-          <div class="text-3xl font-bold text-gray-900 mt-1">{{ stats.thisWeekApplications }}</div>
-        </div>
+      <!-- Top Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <UiCard class="relative overflow-hidden">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-sm font-medium text-zinc-500">Total Applications</p>
+              <p class="text-3xl font-bold text-zinc-900 mt-1 font-mono tracking-tight">
+                {{ formatNumber(stats.totalApplications) }}
+              </p>
+            </div>
+            <div class="w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-zinc-200 to-zinc-300"></div>
+        </UiCard>
+
+        <UiCard class="relative overflow-hidden">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-sm font-medium text-zinc-500">Active Jobs</p>
+              <p class="text-3xl font-bold text-zinc-900 mt-1 font-mono tracking-tight">
+                {{ formatNumber(stats.totalJobs) }}
+              </p>
+            </div>
+            <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-200 to-emerald-300"></div>
+        </UiCard>
+
+        <UiCard class="relative overflow-hidden">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-sm font-medium text-zinc-500">This Week</p>
+              <p class="text-3xl font-bold text-zinc-900 mt-1 font-mono tracking-tight">
+                {{ formatNumber(stats.thisWeekApplications) }}
+              </p>
+            </div>
+            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-200 to-blue-300"></div>
+        </UiCard>
       </div>
 
       <!-- Sync Overview -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900">Sync Overview</h2>
-        </div>
-        <div class="p-6">
-          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            <!-- From TeamTailor -->
-            <div class="text-center p-4 rounded-lg bg-blue-50">
-              <div class="text-2xl font-bold text-blue-600">{{ syncStats.fromTeamtailorPct }}%</div>
-              <div class="text-sm text-gray-600 mt-1">TeamTailor</div>
-              <div class="text-xs text-gray-400">{{ syncStats.fromTeamtailor?.toLocaleString() }} / {{ syncStats.total?.toLocaleString() }}</div>
+      <UiCard padding="none">
+        <div class="px-6 py-4 border-b border-zinc-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-base font-semibold text-zinc-900">Sync Overview</h2>
+              <p class="text-sm text-zinc-500 mt-0.5">Data extraction and sync status</p>
             </div>
-            
-            <!-- With CV -->
-            <div class="text-center p-4 rounded-lg bg-purple-50">
-              <div class="text-2xl font-bold text-purple-600">{{ syncStats.withCvPct }}%</div>
-              <div class="text-sm text-gray-600 mt-1">Con CV</div>
-              <div class="text-xs text-gray-400">{{ syncStats.withCv?.toLocaleString() }} / {{ syncStats.total?.toLocaleString() }}</div>
-            </div>
-            
-            <!-- With Education -->
-            <div class="text-center p-4 rounded-lg" :class="syncStats.withEducationPct >= 80 ? 'bg-green-50' : 'bg-yellow-50'">
-              <div class="text-2xl font-bold" :class="syncStats.withEducationPct >= 80 ? 'text-green-600' : 'text-yellow-600'">{{ syncStats.withEducationPct }}%</div>
-              <div class="text-sm text-gray-600 mt-1">Educación</div>
-              <div class="text-xs text-gray-400">{{ syncStats.withEducation?.toLocaleString() }} / {{ syncStats.total?.toLocaleString() }}</div>
-            </div>
-            
-            <!-- With Work Experience -->
-            <div class="text-center p-4 rounded-lg" :class="syncStats.withWorkExperiencePct >= 80 ? 'bg-green-50' : 'bg-yellow-50'">
-              <div class="text-2xl font-bold" :class="syncStats.withWorkExperiencePct >= 80 ? 'text-green-600' : 'text-yellow-600'">{{ syncStats.withWorkExperiencePct || 0 }}%</div>
-              <div class="text-sm text-gray-600 mt-1">Experiencia</div>
-              <div class="text-xs text-gray-400">{{ (syncStats.withWorkExperience || 0)?.toLocaleString() }} / {{ syncStats.total?.toLocaleString() }}</div>
-            </div>
-            
-            <!-- With Custom Questions -->
-            <div class="text-center p-4 rounded-lg" :class="syncStats.withCustomQuestionsPct >= 80 ? 'bg-green-50' : 'bg-yellow-50'">
-              <div class="text-2xl font-bold" :class="syncStats.withCustomQuestionsPct >= 80 ? 'text-green-600' : 'text-yellow-600'">{{ syncStats.withCustomQuestionsPct }}%</div>
-              <div class="text-sm text-gray-600 mt-1">Preguntas</div>
-              <div class="text-xs text-gray-400">{{ syncStats.withCustomQuestions?.toLocaleString() }} / {{ syncStats.total?.toLocaleString() }}</div>
-            </div>
-            
-            <!-- Processing Completed -->
-            <div class="text-center p-4 rounded-lg" :class="syncStats.processingCompletedPct >= 80 ? 'bg-green-50' : 'bg-yellow-50'">
-              <div class="text-2xl font-bold" :class="syncStats.processingCompletedPct >= 80 ? 'text-green-600' : 'text-yellow-600'">{{ syncStats.processingCompletedPct }}%</div>
-              <div class="text-sm text-gray-600 mt-1">Procesado</div>
-              <div class="text-xs text-gray-400">{{ syncStats.processingCompleted?.toLocaleString() }} / {{ syncStats.total?.toLocaleString() }}</div>
-            </div>
-            
-            <!-- Pending Extraction -->
-            <div class="text-center p-4 rounded-lg bg-orange-50">
-              <div class="text-2xl font-bold text-orange-600">{{ syncStats.pendingExtraction || 0 }}</div>
-              <div class="text-sm text-gray-600 mt-1">Pendiente</div>
-              <div class="text-xs text-gray-400">CVs sin extraer</div>
-            </div>
+            <UiBadge v-if="syncStats.pendingExtraction > 0" variant="warning" dot>
+              {{ syncStats.pendingExtraction }} pending
+            </UiBadge>
           </div>
         </div>
-      </div>
+        <div class="p-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <UiStatCard 
+              label="TeamTailor" 
+              :value="`${syncStats.fromTeamtailorPct}%`"
+              :subtext="`${formatNumber(syncStats.fromTeamtailor)} / ${formatNumber(syncStats.total)}`"
+              variant="info"
+            />
+            <UiStatCard 
+              label="Con CV" 
+              :value="`${syncStats.withCvPct}%`"
+              :subtext="`${formatNumber(syncStats.withCv)} / ${formatNumber(syncStats.total)}`"
+              variant="purple"
+            />
+            <UiStatCard 
+              label="Educación" 
+              :value="`${syncStats.withEducationPct}%`"
+              :subtext="`${formatNumber(syncStats.withEducation)} / ${formatNumber(syncStats.total)}`"
+              :variant="getSyncVariant(syncStats.withEducationPct)"
+            />
+            <UiStatCard 
+              label="Experiencia" 
+              :value="`${syncStats.withWorkExperiencePct || 0}%`"
+              :subtext="`${formatNumber(syncStats.withWorkExperience || 0)} / ${formatNumber(syncStats.total)}`"
+              :variant="getSyncVariant(syncStats.withWorkExperiencePct || 0)"
+            />
+            <UiStatCard 
+              label="Preguntas" 
+              :value="`${syncStats.withCustomQuestionsPct}%`"
+              :subtext="`${formatNumber(syncStats.withCustomQuestions)} / ${formatNumber(syncStats.total)}`"
+              :variant="getSyncVariant(syncStats.withCustomQuestionsPct)"
+            />
+            <UiStatCard 
+              label="Procesado" 
+              :value="`${syncStats.processingCompletedPct}%`"
+              :subtext="`${formatNumber(syncStats.processingCompleted)} / ${formatNumber(syncStats.total)}`"
+              :variant="getSyncVariant(syncStats.processingCompletedPct)"
+            />
+            <UiStatCard 
+              label="Pendiente" 
+              :value="formatNumber(syncStats.pendingExtraction || 0)"
+              subtext="CVs sin extraer"
+              variant="warning"
+            />
+          </div>
+        </div>
+      </UiCard>
 
       <!-- Pipeline Overview -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900">Pipeline Overview</h2>
+      <UiCard padding="none">
+        <div class="px-6 py-4 border-b border-zinc-100">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-semibold text-zinc-900">Pipeline Overview</h2>
+            <UiButton href="/app/pipeline" variant="ghost" size="sm">
+              View Pipeline
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </UiButton>
+          </div>
         </div>
         <div class="p-6">
-          <div class="flex gap-4 overflow-x-auto">
+          <div class="flex gap-3 overflow-x-auto pb-2">
             <div 
               v-for="stage in canonicalStages" 
               :key="stage.canonical"
-              class="flex-shrink-0 w-28 text-center p-4 rounded-lg"
-              :class="{
-                'bg-green-50': stage.kind === 'hired',
-                'bg-red-50': stage.kind === 'rejected',
-                'bg-gray-50': stage.kind === 'active'
-              }"
+              :class="[
+                'flex-shrink-0 w-28 p-4 rounded-xl text-center transition-all',
+                stage.kind === 'hired' ? 'bg-emerald-50 ring-1 ring-emerald-200' :
+                stage.kind === 'rejected' ? 'bg-red-50 ring-1 ring-red-200' :
+                'bg-zinc-50 ring-1 ring-zinc-200'
+              ]"
             >
-              <div class="text-2xl font-bold" :class="{
-                'text-green-600': stage.kind === 'hired',
-                'text-red-600': stage.kind === 'rejected',
-                'text-gray-900': stage.kind === 'active'
-              }">
+              <div :class="[
+                'text-2xl font-bold font-mono',
+                stage.kind === 'hired' ? 'text-emerald-600' :
+                stage.kind === 'rejected' ? 'text-red-600' :
+                'text-zinc-900'
+              ]">
                 {{ stage.count }}
               </div>
-              <div class="text-sm text-gray-600 mt-1">{{ stage.name }}</div>
+              <div class="text-xs text-zinc-600 mt-1 truncate">{{ stage.name }}</div>
             </div>
           </div>
         </div>
-      </div>
+      </UiCard>
 
       <!-- Recent Applications -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 class="text-lg font-semibold text-gray-900">Recent Applications</h2>
-          <Link href="/app/applications" class="text-sm text-indigo-600 hover:text-indigo-800">View all</Link>
+      <UiCard padding="none">
+        <div class="px-6 py-4 border-b border-zinc-100">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-semibold text-zinc-900">Recent Applications</h2>
+            <UiButton href="/app/applications" variant="ghost" size="sm">
+              View All
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </UiButton>
+          </div>
         </div>
-        <div class="divide-y divide-gray-200">
-          <div 
+        <div class="divide-y divide-zinc-100">
+          <Link 
             v-for="app in recentApplications" 
             :key="app.id"
-            class="px-6 py-4 hover:bg-gray-50"
+            :href="`/app/applications/${app.id}`"
+            class="flex items-center justify-between px-6 py-4 hover:bg-zinc-50 transition-colors"
           >
-            <Link :href="`/app/applications/${app.id}`" class="flex justify-between items-center">
-              <div>
-                <div class="font-medium text-gray-900">{{ app.candidate.name }}</div>
-                <div class="text-sm text-gray-500">{{ app.job.title }}</div>
-              </div>
-              <div class="flex items-center gap-3">
-                <span 
-                  v-if="app.stage"
-                  class="px-2 py-1 text-xs font-medium rounded-full"
-                  :class="{
-                    'bg-green-100 text-green-800': app.stage.kind === 'hired',
-                    'bg-red-100 text-red-800': app.stage.kind === 'rejected',
-                    'bg-gray-100 text-gray-800': app.stage.kind === 'active'
-                  }"
-                >
-                  {{ app.stage.name }}
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center">
+                <span class="text-sm font-medium text-zinc-600">
+                  {{ app.candidate.name.split(' ').map(n => n[0]).join('').slice(0, 2) }}
                 </span>
-                <span class="text-sm text-gray-500">{{ formatDate(app.createdAt) }}</span>
               </div>
-            </Link>
-          </div>
-          <div v-if="recentApplications.length === 0" class="px-6 py-8 text-center text-gray-500">
-            No applications yet
+              <div>
+                <div class="font-medium text-zinc-900">{{ app.candidate.name }}</div>
+                <div class="text-sm text-zinc-500">{{ app.job.title }}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <UiBadge 
+                v-if="app.stage"
+                :variant="app.stage.kind === 'hired' ? 'success' : app.stage.kind === 'rejected' ? 'danger' : 'default'"
+              >
+                {{ app.stage.name }}
+              </UiBadge>
+              <span class="text-sm text-zinc-400 font-mono">{{ formatDate(app.createdAt) }}</span>
+            </div>
+          </Link>
+          <div v-if="recentApplications.length === 0" class="px-6 py-12 text-center">
+            <div class="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+            </div>
+            <p class="text-sm text-zinc-500">No applications yet</p>
           </div>
         </div>
-      </div>
+      </UiCard>
     </div>
   </AppLayout>
 </template>
-
-<script>
-export default {
-  methods: {
-    formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric'
-      })
-    }
-  }
-}
-</script>

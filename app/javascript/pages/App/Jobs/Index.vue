@@ -1,6 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { UiPageHeader, UiBadge, UiButton, UiTable, UiEmptyState } from '@/components/ui'
 
 defineProps({
   jobs: Array,
@@ -11,64 +12,82 @@ defineProps({
 <template>
   <AppLayout :currentUser="currentUser">
     <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Job Postings</h1>
-          <p class="text-gray-600">Manage your job postings</p>
-        </div>
-        <Link 
-          href="/app/jobs/new"
-          class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-        >
-          Create Job
-        </Link>
-      </div>
+      <UiPageHeader 
+        title="Job Postings" 
+        description="Manage your job postings"
+      >
+        <template #actions>
+          <UiButton href="/app/jobs/new">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Create Job
+          </UiButton>
+        </template>
+      </UiPageHeader>
 
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="job in jobs" :key="job.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4">
-                <Link :href="`/app/jobs/${job.id}`" class="font-medium text-gray-900 hover:text-indigo-600">
-                  {{ job.title }}
-                </Link>
-                <div class="text-sm text-gray-500">/embed/jobs/{{ job.slug }}</div>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">{{ job.department || '—' }}</td>
-              <td class="px-6 py-4 text-sm text-gray-500">{{ job.location || '—' }}</td>
-              <td class="px-6 py-4">
-                <span 
-                  class="px-2 py-1 text-xs font-medium rounded-full"
-                  :class="job.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                >
-                  {{ job.published ? 'Published' : 'Draft' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">{{ job.applicationsCount }}</td>
-              <td class="px-6 py-4 text-right">
-                <Link :href="`/app/jobs/${job.id}/edit`" class="text-indigo-600 hover:text-indigo-800 text-sm">
-                  Edit
-                </Link>
-              </td>
-            </tr>
-            <tr v-if="jobs.length === 0">
-              <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                No job postings yet. Create your first one!
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <UiTable>
+        <template #header>
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Job</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Department</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Location</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Applications</th>
+            <th class="px-6 py-3 text-right text-xs font-semibold text-zinc-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </template>
+        
+        <tr v-for="job in jobs" :key="job.id" class="group">
+          <td class="px-6 py-4">
+            <Link :href="`/app/jobs/${job.id}`" class="block">
+              <div class="font-medium text-zinc-900 group-hover:text-zinc-600 transition-colors">{{ job.title }}</div>
+              <div class="text-xs text-zinc-400 font-mono mt-0.5">/embed/jobs/{{ job.slug }}</div>
+            </Link>
+          </td>
+          <td class="px-6 py-4">
+            <span v-if="job.department" class="text-sm text-zinc-600">{{ job.department }}</span>
+            <span v-else class="text-sm text-zinc-300">—</span>
+          </td>
+          <td class="px-6 py-4">
+            <span v-if="job.location" class="text-sm text-zinc-600">{{ job.location }}</span>
+            <span v-else class="text-sm text-zinc-300">—</span>
+          </td>
+          <td class="px-6 py-4">
+            <UiBadge 
+              :variant="job.published ? 'success' : 'default'"
+              size="sm"
+              dot
+            >
+              {{ job.published ? 'Published' : 'Draft' }}
+            </UiBadge>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm text-zinc-600 font-mono">{{ job.applicationsCount }}</span>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <UiButton :href="`/app/jobs/${job.id}/edit`" variant="ghost" size="sm">
+              Edit
+            </UiButton>
+          </td>
+        </tr>
+        
+        <tr v-if="jobs.length === 0">
+          <td colspan="6">
+            <UiEmptyState 
+              title="No job postings yet"
+              description="Create your first job posting"
+              icon="document"
+            >
+              <template #action>
+                <UiButton href="/app/jobs/new" size="sm">
+                  Create Job
+                </UiButton>
+              </template>
+            </UiEmptyState>
+          </td>
+        </tr>
+      </UiTable>
     </div>
   </AppLayout>
 </template>

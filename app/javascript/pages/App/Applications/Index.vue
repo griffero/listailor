@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { UiCard, UiPageHeader, UiBadge, UiButton, UiInput, UiSelect, UiTable, UiEmptyState } from '@/components/ui'
 
 const props = defineProps({
   applications: Array,
@@ -32,142 +33,134 @@ function clearFilters() {
   selectedStage.value = ''
   router.get('/app/applications')
 }
+
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
+function getInitials(name) {
+  return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+}
 </script>
 
 <template>
   <AppLayout :currentUser="currentUser">
     <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Applications</h1>
-          <p class="text-gray-600">All applications across jobs</p>
-        </div>
-        <Link 
-          href="/app/applications/new"
-          class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-        >
-          Add Application
-        </Link>
-      </div>
+      <UiPageHeader 
+        title="Applications" 
+        description="All applications across jobs"
+      >
+        <template #actions>
+          <UiButton href="/app/applications/new">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Application
+          </UiButton>
+        </template>
+      </UiPageHeader>
 
       <!-- Filters -->
-      <div class="bg-white rounded-lg shadow p-4">
+      <UiCard>
         <div class="flex flex-wrap gap-4 items-end">
           <div class="flex-1 min-w-[200px]">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-            <input 
+            <UiInput 
               v-model="searchQuery"
-              type="text"
+              label="Search"
               placeholder="Name or email..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               @keyup.enter="applyFilters"
             >
+              <template #icon>
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </template>
+            </UiInput>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Job</label>
-            <select 
-              v-model="selectedJob"
-              class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              @change="applyFilters"
-            >
+          <div class="w-48">
+            <UiSelect v-model="selectedJob" label="Job" @change="applyFilters">
               <option value="">All Jobs</option>
               <option v-for="job in jobs" :key="job.id" :value="job.id">{{ job.title }}</option>
-            </select>
+            </UiSelect>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Stage</label>
-            <select 
-              v-model="selectedStage"
-              class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              @change="applyFilters"
-            >
+          <div class="w-48">
+            <UiSelect v-model="selectedStage" label="Stage" @change="applyFilters">
               <option value="">All Stages</option>
               <option v-for="stage in stages" :key="stage.id" :value="stage.id">{{ stage.name }}</option>
-            </select>
+            </UiSelect>
           </div>
-          <button 
-            @click="applyFilters"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-          >
-            Search
-          </button>
-          <button 
-            @click="clearFilters"
-            class="px-4 py-2 text-gray-600 hover:text-gray-900"
-          >
-            Clear
-          </button>
+          <div class="flex gap-2">
+            <UiButton @click="applyFilters">Search</UiButton>
+            <UiButton @click="clearFilters" variant="ghost">Clear</UiButton>
+          </div>
         </div>
-      </div>
+      </UiCard>
 
       <!-- Applications Table -->
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidate</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">University</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stage</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="app in applications" :key="app.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4">
-                <Link :href="`/app/applications/${app.id}`" class="block">
-                  <div class="font-medium text-gray-900 hover:text-indigo-600">{{ app.candidate.name }}</div>
-                  <div class="text-sm text-gray-500">{{ app.candidate.email }}</div>
-                </Link>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">
-                <Link :href="`/app/jobs/${app.job.id}`" class="hover:text-indigo-600">
-                  {{ app.job.title }}
-                </Link>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-600">
-                <span v-if="app.university">{{ app.university }}</span>
-                <span v-else class="text-gray-400">—</span>
-              </td>
-              <td class="px-6 py-4">
-                <span 
-                  v-if="app.stage"
-                  class="px-2 py-1 text-xs font-medium rounded-full"
-                  :class="{
-                    'bg-green-100 text-green-800': app.stage.kind === 'hired',
-                    'bg-red-100 text-red-800': app.stage.kind === 'rejected',
-                    'bg-gray-100 text-gray-800': app.stage.kind === 'active'
-                  }"
-                >
-                  {{ app.stage.name }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(app.createdAt) }}</td>
-            </tr>
-            <tr v-if="applications.length === 0">
-              <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                No applications found
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <UiTable>
+        <template #header>
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Candidate</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Job</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">University</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Stage</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Date</th>
+          </tr>
+        </template>
+        
+        <tr v-for="app in applications" :key="app.id" class="group">
+          <td class="px-6 py-4">
+            <Link :href="`/app/applications/${app.id}`" class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-zinc-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-zinc-200 transition-colors">
+                <span class="text-xs font-medium text-zinc-600">{{ getInitials(app.candidate.name) }}</span>
+              </div>
+              <div>
+                <div class="font-medium text-zinc-900 group-hover:text-zinc-600 transition-colors">{{ app.candidate.name }}</div>
+                <div class="text-sm text-zinc-500 font-mono">{{ app.candidate.email }}</div>
+              </div>
+            </Link>
+          </td>
+          <td class="px-6 py-4">
+            <Link :href="`/app/jobs/${app.job.id}`" class="text-sm text-zinc-600 hover:text-zinc-900 transition-colors">
+              {{ app.job.title }}
+            </Link>
+          </td>
+          <td class="px-6 py-4">
+            <span v-if="app.university" class="text-sm text-zinc-600">{{ app.university }}</span>
+            <span v-else class="text-sm text-zinc-300">—</span>
+          </td>
+          <td class="px-6 py-4">
+            <UiBadge 
+              v-if="app.stage"
+              :variant="app.stage.kind === 'hired' ? 'success' : app.stage.kind === 'rejected' ? 'danger' : 'default'"
+              size="sm"
+            >
+              {{ app.stage.name }}
+            </UiBadge>
+          </td>
+          <td class="px-6 py-4 text-sm text-zinc-500 font-mono">{{ formatDate(app.createdAt) }}</td>
+        </tr>
+        
+        <tr v-if="applications.length === 0">
+          <td colspan="5">
+            <UiEmptyState 
+              title="No applications found"
+              description="Try adjusting your filters or add a new application"
+              icon="users"
+            >
+              <template #action>
+                <UiButton href="/app/applications/new" size="sm">
+                  Add Application
+                </UiButton>
+              </template>
+            </UiEmptyState>
+          </td>
+        </tr>
+      </UiTable>
     </div>
   </AppLayout>
 </template>
-
-<script>
-export default {
-  methods: {
-    formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
-  }
-}
-</script>
