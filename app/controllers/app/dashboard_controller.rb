@@ -126,6 +126,7 @@ module App
         hasStartupExperience: app.has_startup_experience,
         hasYearTenure: app.has_year_tenure,
         hasPersonalProjects: app.has_personal_projects,
+        coverLetterDecision: app.cover_letter_decision,
         createdAt: app.created_at.iso8601
       }
     end

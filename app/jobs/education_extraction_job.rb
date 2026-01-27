@@ -86,17 +86,27 @@ class EducationExtractionJob < ApplicationJob
       extracted = CvExtractor.extract(cv_text)
       insights = extracted[:insights] || {}
 
+      # Evaluate cover letter if present and not already evaluated
+      cover_letter_result = evaluate_cover_letter(app)
+
       # Save results
-      app.update!(
+      update_attrs = {
         education: extracted[:education],
         work_experience: extracted[:work_experience],
         has_startup_experience: insights[:has_startup_experience],
         has_year_tenure: insights[:has_year_tenure],
         has_personal_projects: insights[:has_personal_projects],
         processing_completed_at: Time.current
-      )
+      }
 
-      Rails.logger.info("EducationExtractionJob: Successfully extracted data for app #{app.id} (#{extracted[:work_experience]&.size || 0} jobs, startup=#{insights[:has_startup_experience]}, tenure=#{insights[:has_year_tenure]}, projects=#{insights[:has_personal_projects]})")
+      if cover_letter_result
+        update_attrs[:cover_letter_evaluation] = cover_letter_result
+        update_attrs[:cover_letter_decision] = cover_letter_result[:decision]
+      end
+
+      app.update!(update_attrs)
+
+      Rails.logger.info("EducationExtractionJob: Successfully extracted data for app #{app.id} (#{extracted[:work_experience]&.size || 0} jobs, startup=#{insights[:has_startup_experience]}, tenure=#{insights[:has_year_tenure]}, projects=#{insights[:has_personal_projects]}, cover_letter=#{cover_letter_result&.dig(:decision) || 'none'})")
     rescue PdfTextExtractor::ExtractionError => e
       Rails.logger.error("EducationExtractionJob: PDF extraction failed for app #{app.id}: #{e.message}")
       # Mark as completed to not block indefinitely
@@ -107,6 +117,24 @@ class EducationExtractionJob < ApplicationJob
     rescue StandardError => e
       Rails.logger.error("EducationExtractionJob: Unexpected error for app #{app.id}: #{e.class}: #{e.message}")
     end
+  end
+
+  def evaluate_cover_letter(app)
+    # Skip if already evaluated
+    return nil if app.cover_letter_decision.present?
+
+    # Find cover letter from application answers
+    cover_letter_question = GlobalQuestion.find_by(label: "Cover Letter (Teamtailor)")
+    return nil unless cover_letter_question
+
+    cover_letter_answer = app.application_answers.find_by(global_question_id: cover_letter_question.id)
+    return nil if cover_letter_answer.blank? || cover_letter_answer.value.blank?
+
+    # Evaluate using AI
+    CoverLetterEvaluator.new(cover_letter_answer.value).evaluate
+  rescue StandardError => e
+    Rails.logger.warn("EducationExtractionJob: Cover letter evaluation failed for app #{app.id}: #{e.message}")
+    nil
   end
 
   def mark_apps_without_cv_as_completed

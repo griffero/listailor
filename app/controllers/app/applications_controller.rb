@@ -135,6 +135,7 @@ module App
         hasStartupExperience: app.has_startup_experience,
         hasYearTenure: app.has_year_tenure,
         hasPersonalProjects: app.has_personal_projects,
+        coverLetterDecision: app.cover_letter_decision,
         createdAt: app.created_at.iso8601
       }
     end
@@ -150,6 +151,8 @@ module App
         hasStartupExperience: app.has_startup_experience,
         hasYearTenure: app.has_year_tenure,
         hasPersonalProjects: app.has_personal_projects,
+        coverLetterDecision: app.cover_letter_decision,
+        coverLetterEvaluation: app.cover_letter_evaluation,
         processingCompleted: app.processing_completed_at.present?,
         completedStageIds: app.completed_stage_ids,
         answers: app.application_answers.ordered.map do |answer|

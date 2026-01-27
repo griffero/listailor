@@ -9,7 +9,8 @@ const props = defineProps({
   envSettings: Object,
   globalQuestions: Array,
   members: Array,
-  currentUser: Object
+  currentUser: Object,
+  defaultCoverLetterPrompt: String
 })
 
 function formatDate(dateStr) {
@@ -36,6 +37,7 @@ const form = ref({
   outbound_webhook_url: props.settings.outboundWebhookUrl || '',
   n8n_send_email_webhook_url: props.settings.n8nSendEmailWebhookUrl || '',
   embed_allowed_origins: props.settings.embedAllowedOrigins || '',
+  cover_letter_evaluation_prompt: props.settings.coverLetterEvaluationPrompt || '',
   departments: props.settings.departments || [],
   locations: props.settings.locations || []
 })
@@ -55,6 +57,7 @@ function submit() {
     outbound_webhook_url: form.value.outbound_webhook_url,
     n8n_send_email_webhook_url: form.value.n8n_send_email_webhook_url,
     embed_allowed_origins: form.value.embed_allowed_origins,
+    cover_letter_evaluation_prompt: form.value.cover_letter_evaluation_prompt,
     departments: JSON.stringify(form.value.departments),
     locations: JSON.stringify(form.value.locations)
   })
@@ -285,6 +288,39 @@ function removeGlobalQuestion(id) {
             <UiButton @click="addGlobalQuestion" variant="secondary">
               Add Global Question
             </UiButton>
+          </div>
+        </div>
+      </UiCard>
+
+      <!-- AI Configuration -->
+      <UiCard>
+        <div class="mb-6">
+          <h2 class="text-base font-semibold text-zinc-900">AI Cover Letter Evaluation</h2>
+          <p class="text-sm text-zinc-500 mt-1">Customize the prompt used to evaluate cover letters</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-zinc-700 mb-2">Evaluation Prompt</label>
+            <textarea 
+              v-model="form.cover_letter_evaluation_prompt"
+              rows="12"
+              :placeholder="defaultCoverLetterPrompt"
+              class="w-full px-3 py-2 text-sm border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-colors resize-none font-mono"
+            ></textarea>
+            <p class="mt-2 text-xs text-zinc-500">
+              Leave empty to use the default prompt. The cover letter text will be appended after your prompt.
+            </p>
+          </div>
+          
+          <div class="flex items-center justify-between pt-4 border-t border-zinc-100">
+            <button 
+              @click="form.cover_letter_evaluation_prompt = ''"
+              class="text-sm text-zinc-500 hover:text-zinc-700 transition-colors"
+            >
+              Reset to default
+            </button>
+            <UiButton @click="submit">Save Prompt</UiButton>
           </div>
         </div>
       </UiCard>

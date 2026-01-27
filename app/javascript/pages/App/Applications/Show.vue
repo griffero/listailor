@@ -379,7 +379,7 @@ function getInitials(name) {
           </UiCard>
 
           <!-- Insights -->
-          <UiCard v-if="application.hasStartupExperience || application.hasYearTenure || application.hasPersonalProjects || (application.cvUrl && !application.processingCompleted)">
+          <UiCard v-if="application.hasStartupExperience || application.hasYearTenure || application.hasPersonalProjects || application.coverLetterDecision || (application.cvUrl && !application.processingCompleted)">
             <h3 class="text-sm font-semibold text-zinc-900 mb-4">Insights</h3>
             
             <div v-if="application.cvUrl && !application.processingCompleted && !application.hasStartupExperience && !application.hasYearTenure && !application.hasPersonalProjects" class="flex items-center gap-2 text-sm text-zinc-500">
@@ -415,9 +415,41 @@ function getInitials(name) {
                 </span>
                 <span class="text-zinc-700">Proyectos propios</span>
               </div>
-              <div v-if="!application.hasStartupExperience && !application.hasYearTenure && !application.hasPersonalProjects && application.processingCompleted" class="text-zinc-400 text-sm italic">
+              <div v-if="application.coverLetterDecision === 'advance'" class="flex items-center gap-2 text-sm">
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100 text-emerald-600">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+                <span class="text-zinc-700">Cover Letter: Advance</span>
+              </div>
+              <div v-if="application.coverLetterDecision === 'reject'" class="flex items-center gap-2 text-sm">
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-red-100 text-red-600">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+                <span class="text-zinc-700">Cover Letter: Reject</span>
+              </div>
+              <div v-if="!application.hasStartupExperience && !application.hasYearTenure && !application.hasPersonalProjects && !application.coverLetterDecision && application.processingCompleted" class="text-zinc-400 text-sm italic">
                 No insights detected
               </div>
+            </div>
+          </UiCard>
+          
+          <!-- Cover Letter Evaluation -->
+          <UiCard v-if="application.coverLetterEvaluation">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-semibold text-zinc-900">Cover Letter Analysis</h3>
+              <UiBadge 
+                :variant="application.coverLetterDecision === 'advance' ? 'success' : application.coverLetterDecision === 'reject' ? 'danger' : 'default'"
+                size="sm"
+              >
+                {{ application.coverLetterDecision === 'advance' ? 'Advance' : application.coverLetterDecision === 'reject' ? 'Reject' : 'Unclear' }}
+              </UiBadge>
+            </div>
+            <div class="text-sm text-zinc-600 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+              {{ application.coverLetterEvaluation.evaluation }}
             </div>
           </UiCard>
 

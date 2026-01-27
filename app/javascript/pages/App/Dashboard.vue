@@ -283,7 +283,25 @@ function getInitials(name) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </span>
-                <span v-if="!app.hasStartupExperience && !app.hasYearTenure && !app.hasPersonalProjects" class="text-zinc-300">—</span>
+                <span 
+                  v-if="app.coverLetterDecision === 'advance'" 
+                  class="inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100 text-emerald-600"
+                  title="Cover Letter: Advance"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+                <span 
+                  v-if="app.coverLetterDecision === 'reject'" 
+                  class="inline-flex items-center justify-center w-6 h-6 rounded bg-red-100 text-red-600"
+                  title="Cover Letter: Reject"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+                <span v-if="!app.hasStartupExperience && !app.hasYearTenure && !app.hasPersonalProjects && !app.coverLetterDecision" class="text-zinc-300">—</span>
               </div>
             </td>
             <td class="px-6 py-4">
