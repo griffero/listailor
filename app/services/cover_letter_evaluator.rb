@@ -63,13 +63,38 @@ class CoverLetterEvaluator
   private
 
   def extract_decision(content)
-    # Look for ADVANCE or REJECT at the end of the response
-    last_lines = content.split("\n").last(5).join(" ").upcase
+    # Look for explicit decision patterns first
+    content_upper = content.upcase
     
-    if last_lines.include?("ADVANCE")
-      "advance"
-    elsif last_lines.include?("REJECT")
+    # Check for "Decision: REJECT" or "Decision: ADVANCE" pattern (most reliable)
+    if content_upper =~ /DECISION[:\s]+REJECT/
+      return "reject"
+    elsif content_upper =~ /DECISION[:\s]+ADVANCE/
+      return "advance"
+    end
+    
+    # Check for standalone ADVANCE or REJECT at the very end (last line)
+    last_line = content.strip.split("\n").last.to_s.upcase.strip
+    
+    # Check if last line is just the decision word
+    return "advance" if last_line == "ADVANCE" || last_line == "ADVANCE."
+    return "reject" if last_line == "REJECT" || last_line == "REJECT."
+    
+    # Check if last line contains the decision as a final statement
+    if last_line =~ /\bREJECT\b/ && !last_line.include?("ADVANCE")
+      return "reject"
+    elsif last_line =~ /\bADVANCE\b/ && !last_line.include?("REJECT")
+      return "advance"
+    end
+    
+    # Fallback: look at last few lines, but be more careful
+    last_section = content.split("\n").last(3).join(" ").upcase
+    
+    # Only match if it's clearly a decision, not just mentioning the words
+    if last_section =~ /\bREJECT\b(?!.*\bADVANCE\b)/
       "reject"
+    elsif last_section =~ /\bADVANCE\b(?!.*\bREJECT\b)/
+      "advance"
     else
       "unclear"
     end
