@@ -19,6 +19,7 @@ class Application < ApplicationRecord
 
   scope :for_job, ->(job_posting_id) { where(job_posting_id: job_posting_id) }
   scope :for_stage, ->(stage_id) { where(current_stage_id: stage_id) }
+  scope :for_canonical_stage, ->(canonical_stage) { joins(:current_stage).where(pipeline_stages: { canonical_stage: canonical_stage }) }
   scope :recent, -> { order(created_at: :desc) }
   scope :missing_teamtailor_full_sync, -> { where(teamtailor_full_sync_at: nil) }
   scope :search, ->(query) {

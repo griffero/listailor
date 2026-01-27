@@ -8,7 +8,7 @@ module App
 
       # Filters
       @applications = @applications.for_job(params[:job_id]) if params[:job_id].present?
-      @applications = @applications.for_stage(params[:stage_id]) if params[:stage_id].present?
+      @applications = @applications.for_canonical_stage(params[:canonical_stage]) if params[:canonical_stage].present?
       @applications = @applications.search(params[:q]) if params[:q].present?
 
       @applications = @applications.page(params[:page]).per(25) if @applications.respond_to?(:page)
@@ -16,10 +16,10 @@ module App
       render inertia: "App/Applications/Index", props: {
         applications: @applications.limit(100).map { |app| serialize_application(app) },
         jobs: JobPosting.ordered.map { |job| { id: job.id, title: job.title } },
-        stages: PipelineStage.ordered.map { |stage| { id: stage.id, name: stage.name } },
+        canonicalStages: canonical_stage_options,
         filters: {
           jobId: params[:job_id],
-          stageId: params[:stage_id],
+          canonicalStage: params[:canonical_stage],
           query: params[:q]
         }
       }
@@ -200,6 +200,21 @@ module App
         meetingUrl: interview.meeting_url,
         participants: interview.participants_list
       }
+    end
+
+    def canonical_stage_options
+      # Get canonical stages that actually have applications, with counts
+      counts = Application.joins(:current_stage)
+                          .group("pipeline_stages.canonical_stage")
+                          .count
+
+      PipelineStage::CANONICAL_STAGES.map do |stage|
+        {
+          value: stage,
+          label: stage.titleize,
+          count: counts[stage] || 0
+        }
+      end.select { |s| s[:count] > 0 }
     end
   end
 end

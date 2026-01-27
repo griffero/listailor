@@ -7,20 +7,20 @@ import { UiCard, UiPageHeader, UiBadge, UiButton, UiInput, UiSelect, UiTable, Ui
 const props = defineProps({
   applications: Array,
   jobs: Array,
-  stages: Array,
+  canonicalStages: Array,
   filters: Object,
   currentUser: Object
 })
 
 const searchQuery = ref(props.filters.query || '')
 const selectedJob = ref(props.filters.jobId || '')
-const selectedStage = ref(props.filters.stageId || '')
+const selectedStage = ref(props.filters.canonicalStage || '')
 
 function applyFilters() {
   router.get('/app/applications', {
     q: searchQuery.value || undefined,
     job_id: selectedJob.value || undefined,
-    stage_id: selectedStage.value || undefined
+    canonical_stage: selectedStage.value || undefined
   }, {
     preserveState: true,
     preserveScroll: true
@@ -90,7 +90,9 @@ function getInitials(name) {
           <div class="w-48">
             <UiSelect v-model="selectedStage" label="Stage" @change="applyFilters">
               <option value="">All Stages</option>
-              <option v-for="stage in stages" :key="stage.id" :value="stage.id">{{ stage.name }}</option>
+              <option v-for="stage in canonicalStages" :key="stage.value" :value="stage.value">
+                {{ stage.label }} ({{ stage.count }})
+              </option>
             </UiSelect>
           </div>
           <div class="flex gap-2">
