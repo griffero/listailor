@@ -1,6 +1,7 @@
 module App
   class EmailTemplatesController < BaseController
     before_action :set_template, only: [:show, :edit, :update, :destroy]
+    before_action :require_write_permission!, only: [:new, :create, :edit, :update, :destroy]
 
     def index
       @templates = EmailTemplate.ordered

@@ -150,7 +150,7 @@ function getInitials(name) {
             </div>
           </div>
         </div>
-        <UiButton :href="`/app/applications/${application.id}/emails/new`">
+        <UiButton v-if="currentUser?.canWrite" :href="`/app/applications/${application.id}/emails/new`">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
@@ -172,7 +172,7 @@ function getInitials(name) {
                 {{ application.stage.name }}
               </UiBadge>
             </div>
-            <div class="flex items-center gap-3">
+            <div v-if="currentUser?.canWrite" class="flex items-center gap-3">
               <div class="flex-1">
                 <UiSelect v-model="selectedStage">
                   <option v-for="stage in stages" :key="stage.id" :value="stage.id">
@@ -190,7 +190,7 @@ function getInitials(name) {
           </UiCard>
 
           <!-- Stage Checklist -->
-          <UiCard v-if="checkableStages.length > 0">
+          <UiCard v-if="checkableStages.length > 0 && currentUser?.canWrite">
             <h2 class="text-base font-semibold text-zinc-900 mb-4">Stage Checklist</h2>
             <p class="text-xs text-zinc-500 mb-4">Mark interview stages as done</p>
             <div class="space-y-2">
@@ -285,7 +285,7 @@ function getInitials(name) {
           </UiCard>
 
           <!-- Add Note -->
-          <UiCard>
+          <UiCard v-if="currentUser?.canWrite">
             <h2 class="text-base font-semibold text-zinc-900 mb-4">Add Note</h2>
             <div class="space-y-4">
               <textarea 

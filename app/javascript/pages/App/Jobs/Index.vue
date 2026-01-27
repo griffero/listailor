@@ -43,7 +43,7 @@ const countByCountry = computed(() => {
         title="Job Postings" 
         description="Manage your job postings"
       >
-        <template #actions>
+        <template #actions v-if="currentUser?.canWrite">
           <UiButton href="/app/jobs/new">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -154,7 +154,7 @@ const countByCountry = computed(() => {
             <span class="text-sm text-zinc-600 font-mono">{{ job.applicationsCount }}</span>
           </td>
           <td class="px-6 py-4 text-right">
-            <UiButton :href="`/app/jobs/${job.id}/edit`" variant="ghost" size="sm">
+            <UiButton v-if="currentUser?.canWrite" :href="`/app/jobs/${job.id}/edit`" variant="ghost" size="sm">
               Edit
             </UiButton>
           </td>

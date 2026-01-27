@@ -1,6 +1,7 @@
 module App
   class GlobalQuestionsController < BaseController
     before_action :set_question, only: [:update, :destroy]
+    before_action :require_write_permission!
 
     def create
       @question = GlobalQuestion.new(question_params)

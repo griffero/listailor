@@ -1,5 +1,7 @@
 module App
   class SettingsController < BaseController
+    before_action :require_write_permission!, only: [:update, :update_user_role]
+
     def index
       render inertia: "App/Settings/Index", props: {
         settings: {
@@ -40,6 +42,21 @@ module App
       redirect_to app_settings_path, notice: "Settings saved"
     end
 
+    def update_user_role
+      user = User.find(params[:user_id])
+
+      # Prevent removing the last admin
+      if user.admin? && params[:role] == "viewer"
+        admin_count = User.where(role: "admin").count
+        if admin_count <= 1
+          return redirect_to app_settings_path, alert: "Cannot remove the last admin"
+        end
+      end
+
+      user.update!(role: params[:role])
+      redirect_to app_settings_path, notice: "User role updated"
+    end
+
     private
 
     def serialize_global_question(question)
@@ -57,6 +74,7 @@ module App
       {
         id: user.id,
         email: user.email,
+        role: user.role,
         createdAt: user.created_at.iso8601,
         lastSignedInAt: user.last_signed_in_at&.iso8601
       }

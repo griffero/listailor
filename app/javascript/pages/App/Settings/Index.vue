@@ -114,6 +114,12 @@ function removeGlobalQuestion(id) {
     })
   }
 }
+
+function updateUserRole(userId, role) {
+  router.patch(`/app/settings/users/${userId}/role`, { role }, {
+    preserveScroll: true
+  })
+}
 </script>
 
 <template>
@@ -141,23 +147,40 @@ function removeGlobalQuestion(id) {
             class="flex items-center justify-between py-3 first:pt-0 last:pb-0"
           >
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-zinc-100 flex items-center justify-center">
-                <span class="text-sm font-medium text-zinc-600">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center"
+                   :class="member.role === 'admin' ? 'bg-violet-100' : 'bg-zinc-100'">
+                <span class="text-sm font-medium"
+                      :class="member.role === 'admin' ? 'text-violet-600' : 'text-zinc-600'">
                   {{ member.email.charAt(0).toUpperCase() }}
                 </span>
               </div>
               <div>
-                <div class="font-medium text-zinc-900 text-sm">{{ member.email }}</div>
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-zinc-900 text-sm">{{ member.email }}</span>
+                  <UiBadge v-if="member.role === 'admin'" variant="info" size="sm">Admin</UiBadge>
+                  <UiBadge v-else variant="outline" size="sm">Viewer</UiBadge>
+                </div>
                 <div class="text-xs text-zinc-400 font-mono">
                   Joined {{ formatDate(member.createdAt) }}
                 </div>
               </div>
             </div>
-            <div class="text-right">
-              <div class="text-xs text-zinc-500">Last active</div>
-              <div class="text-xs text-zinc-400 font-mono">
-                {{ member.lastSignedInAt ? formatDateTime(member.lastSignedInAt) : 'Never' }}
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <div class="text-xs text-zinc-500">Last active</div>
+                <div class="text-xs text-zinc-400 font-mono">
+                  {{ member.lastSignedInAt ? formatDateTime(member.lastSignedInAt) : 'Never' }}
+                </div>
               </div>
+              <select 
+                v-if="currentUser?.canWrite && member.email !== currentUser?.email"
+                :value="member.role"
+                @change="updateUserRole(member.id, ($event.target as HTMLSelectElement).value)"
+                class="text-xs px-2 py-1 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+              >
+                <option value="viewer">Viewer</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
           </div>
         </div>
@@ -168,7 +191,7 @@ function removeGlobalQuestion(id) {
       </UiCard>
 
       <!-- Departments & Locations -->
-      <UiCard>
+      <UiCard v-if="currentUser?.canWrite">
         <h2 class="text-base font-semibold text-zinc-900 mb-6">Job Configuration</h2>
 
         <!-- Departments -->
@@ -235,7 +258,7 @@ function removeGlobalQuestion(id) {
       </UiCard>
 
       <!-- Global Questions -->
-      <UiCard>
+      <UiCard v-if="currentUser?.canWrite">
         <div class="mb-6">
           <h2 class="text-base font-semibold text-zinc-900">Global Application Questions</h2>
           <p class="text-sm text-zinc-500 mt-1">These questions will appear in all job applications</p>
@@ -293,7 +316,7 @@ function removeGlobalQuestion(id) {
       </UiCard>
 
       <!-- AI Configuration -->
-      <UiCard>
+      <UiCard v-if="currentUser?.canWrite">
         <div class="mb-6">
           <h2 class="text-base font-semibold text-zinc-900">AI Cover Letter Evaluation</h2>
           <p class="text-sm text-zinc-500 mt-1">Customize the prompt used to evaluate cover letters</p>
@@ -326,7 +349,7 @@ function removeGlobalQuestion(id) {
       </UiCard>
 
       <!-- Webhooks -->
-      <UiCard>
+      <UiCard v-if="currentUser?.canWrite">
         <h2 class="text-base font-semibold text-zinc-900 mb-6">Webhooks & Integrations</h2>
 
         <div class="space-y-6">
@@ -364,7 +387,7 @@ function removeGlobalQuestion(id) {
       </UiCard>
 
       <!-- API Info -->
-      <UiCard>
+      <UiCard v-if="currentUser?.canWrite">
         <h2 class="text-base font-semibold text-zinc-900 mb-6">API Information</h2>
         <div class="space-y-6 text-sm">
           <div>

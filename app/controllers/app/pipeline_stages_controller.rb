@@ -1,6 +1,7 @@
 module App
   class PipelineStagesController < BaseController
     before_action :set_stage, only: [:update, :destroy]
+    before_action :require_write_permission!
 
     def create
       @stage = PipelineStage.new(stage_params)

@@ -1,10 +1,25 @@
 class User < ApplicationRecord
+  ROLES = %w[viewer admin].freeze
+
   has_secure_token :magic_login_token
 
   has_many :created_email_templates, class_name: "EmailTemplate", foreign_key: :created_by_user_id, dependent: :nullify
   has_many :created_application_events, class_name: "ApplicationEvent", foreign_key: :created_by_user_id, dependent: :nullify
 
   validates :email, presence: true, uniqueness: { case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :role, presence: true, inclusion: { in: ROLES }
+
+  def admin?
+    role == "admin"
+  end
+
+  def viewer?
+    role == "viewer"
+  end
+
+  def can_write?
+    admin?
+  end
 
   before_save :downcase_email
 

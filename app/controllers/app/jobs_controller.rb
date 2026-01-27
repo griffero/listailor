@@ -1,6 +1,7 @@
 module App
   class JobsController < BaseController
     before_action :set_job, only: [:show, :edit, :update, :destroy, :publish, :unpublish, :archive, :unarchive]
+    before_action :require_write_permission!, only: [:new, :create, :edit, :update, :destroy, :publish, :unpublish, :archive, :unarchive]
 
     def index
       @jobs = JobPosting.active.ordered

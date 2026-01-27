@@ -1,6 +1,7 @@
 module App
   class ApplicationEmailsController < BaseController
     before_action :set_application
+    before_action :require_write_permission!
 
     def new
       @templates = EmailTemplate.ordered

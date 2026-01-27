@@ -1,6 +1,7 @@
 module App
   class ApplicationNotesController < BaseController
     before_action :set_application
+    before_action :require_write_permission!
 
     def create
       @event = @application.events.build(

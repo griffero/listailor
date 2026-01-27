@@ -1,6 +1,7 @@
 module App
   class ApplicationsController < BaseController
     before_action :set_application, only: [:show, :move_stage, :toggle_stage_completion]
+    before_action :require_write_permission!, only: [:new, :create, :move_stage, :toggle_stage_completion]
 
     def index
       @applications = Application.includes(:candidate, :job_posting, :current_stage)

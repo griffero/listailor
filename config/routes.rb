@@ -68,6 +68,7 @@ Rails.application.routes.draw do
     # Settings
     get "settings", to: "settings#index"
     patch "settings", to: "settings#update"
+    patch "settings/users/:user_id/role", to: "settings#update_user_role", as: :update_user_role
 
     # Global Questions
     resources :global_questions, only: [:create, :update, :destroy]
