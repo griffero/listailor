@@ -3,7 +3,8 @@ class EducationExtractionJob < ApplicationJob
 
   LOCK_KEY = "education_extraction"
   LOCK_TTL = 30.minutes
-  BATCH_SIZE = 100
+  BATCH_SIZE = 200
+  THREAD_POOL_SIZE = 5
 
   def perform
     return unless acquire_lock
@@ -14,18 +15,45 @@ class EducationExtractionJob < ApplicationJob
       .where(processing_completed_at: nil)
       .order(created_at: :desc)
       .limit(BATCH_SIZE)
+      .to_a
 
-    Rails.logger.info("EducationExtractionJob: Processing #{pending_apps.count} applications")
+    Rails.logger.info("EducationExtractionJob: Processing #{pending_apps.count} applications with #{THREAD_POOL_SIZE} threads")
 
-    pending_apps.find_each do |app|
-      process_application(app)
-      heartbeat_lock if (app.id % 10).zero?
+    # Process in parallel using thread pool
+    queue = Queue.new
+    pending_apps.each { |app| queue << app }
+    THREAD_POOL_SIZE.times { queue << :done }
+
+    mutex = Mutex.new
+    processed = 0
+    failed = 0
+
+    threads = THREAD_POOL_SIZE.times.map do
+      Thread.new do
+        while (app = queue.pop) != :done
+          begin
+            process_application(app)
+            mutex.synchronize { processed += 1 }
+          rescue StandardError => e
+            mutex.synchronize { failed += 1 }
+            Rails.logger.warn("EducationExtractionJob: Thread error for app #{app.id}: #{e.message}")
+          end
+        end
+      end
     end
+
+    # Wait for all threads with periodic heartbeat
+    until threads.all? { |t| !t.alive? }
+      sleep 5
+      heartbeat_lock
+    end
+
+    threads.each(&:join)
 
     # Also mark apps without CV as completed (nothing to extract)
     mark_apps_without_cv_as_completed
 
-    Rails.logger.info("EducationExtractionJob: Completed")
+    Rails.logger.info("EducationExtractionJob: Completed - processed: #{processed}, failed: #{failed}")
   ensure
     release_lock
   end

@@ -3,12 +3,11 @@ class CvBackfillJob < ApplicationJob
 
   LOCK_KEY = "cv_backfill"
   LOCK_TTL = 30.minutes
-  BATCH_SIZE = 200
+  BATCH_SIZE = 500
+  THREAD_POOL_SIZE = 10
 
   def perform
     return unless acquire_lock
-
-    client = Teamtailor::Client.new
 
     # Find applications without CV that have a teamtailor_id
     apps_without_cv = Application
@@ -19,15 +18,43 @@ class CvBackfillJob < ApplicationJob
       .where.not(candidates: { teamtailor_id: nil })
       .order(created_at: :desc)
       .limit(BATCH_SIZE)
+      .to_a
 
-    Rails.logger.info("CvBackfillJob: Processing #{apps_without_cv.count} applications")
+    Rails.logger.info("CvBackfillJob: Processing #{apps_without_cv.count} applications with #{THREAD_POOL_SIZE} threads")
 
-    apps_without_cv.find_each do |app|
-      process_application(app, client)
-      heartbeat_lock if (app.id % 10).zero?
+    # Process in parallel using thread pool
+    queue = Queue.new
+    apps_without_cv.each { |app| queue << app }
+    THREAD_POOL_SIZE.times { queue << :done }
+
+    mutex = Mutex.new
+    processed = 0
+    failed = 0
+
+    threads = THREAD_POOL_SIZE.times.map do
+      Thread.new do
+        client = Teamtailor::Client.new
+        while (app = queue.pop) != :done
+          begin
+            process_application(app, client)
+            mutex.synchronize { processed += 1 }
+          rescue StandardError => e
+            mutex.synchronize { failed += 1 }
+            Rails.logger.warn("CvBackfillJob: Thread error for app #{app.id}: #{e.message}")
+          end
+        end
+      end
     end
 
-    Rails.logger.info("CvBackfillJob: Completed")
+    # Wait for all threads with periodic heartbeat
+    until threads.all? { |t| !t.alive? }
+      sleep 5
+      heartbeat_lock
+    end
+
+    threads.each(&:join)
+
+    Rails.logger.info("CvBackfillJob: Completed - processed: #{processed}, failed: #{failed}")
   ensure
     release_lock
   end
