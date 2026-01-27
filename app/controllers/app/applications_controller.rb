@@ -121,6 +121,9 @@ module App
         stage: app.current_stage ? { id: app.current_stage.id, name: app.current_stage.name, kind: app.current_stage.kind } : nil,
         source: app.source,
         university: app.education&.dig("university", "name"),
+        hasStartupExperience: app.has_startup_experience,
+        hasYearTenure: app.has_year_tenure,
+        hasPersonalProjects: app.has_personal_projects,
         createdAt: app.created_at.iso8601
       }
     end
@@ -133,6 +136,9 @@ module App
         cvUrl: app.cv.attached? ? rails_blob_path(app.cv) : nil,
         education: app.education,
         workExperience: app.work_experience,
+        hasStartupExperience: app.has_startup_experience,
+        hasYearTenure: app.has_year_tenure,
+        hasPersonalProjects: app.has_personal_projects,
         processingCompleted: app.processing_completed_at.present?,
         answers: app.application_answers.ordered.map do |answer|
           {
