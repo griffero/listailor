@@ -6,6 +6,7 @@ defineProps({
   recentApplications: Array,
   canonicalStages: Array,
   stats: Object,
+  syncStats: Object,
   currentUser: Object
 })
 </script>
@@ -32,6 +33,58 @@ defineProps({
         <div class="bg-white rounded-lg shadow p-6">
           <div class="text-sm font-medium text-gray-500">This Week</div>
           <div class="text-3xl font-bold text-gray-900 mt-1">{{ stats.thisWeekApplications }}</div>
+        </div>
+      </div>
+
+      <!-- Sync Overview -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900">Sync Overview</h2>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <!-- From TeamTailor -->
+            <div class="text-center p-4 rounded-lg bg-blue-50">
+              <div class="text-2xl font-bold text-blue-600">{{ syncStats.fromTeamtailorPct }}%</div>
+              <div class="text-sm text-gray-600 mt-1">TeamTailor</div>
+              <div class="text-xs text-gray-400">{{ syncStats.fromTeamtailor.toLocaleString() }} / {{ syncStats.total.toLocaleString() }}</div>
+            </div>
+            
+            <!-- With CV -->
+            <div class="text-center p-4 rounded-lg bg-purple-50">
+              <div class="text-2xl font-bold text-purple-600">{{ syncStats.withCvPct }}%</div>
+              <div class="text-sm text-gray-600 mt-1">Con CV</div>
+              <div class="text-xs text-gray-400">{{ syncStats.withCv.toLocaleString() }} / {{ syncStats.total.toLocaleString() }}</div>
+            </div>
+            
+            <!-- With Education -->
+            <div class="text-center p-4 rounded-lg" :class="syncStats.withEducationPct >= 80 ? 'bg-green-50' : 'bg-yellow-50'">
+              <div class="text-2xl font-bold" :class="syncStats.withEducationPct >= 80 ? 'text-green-600' : 'text-yellow-600'">{{ syncStats.withEducationPct }}%</div>
+              <div class="text-sm text-gray-600 mt-1">Educación</div>
+              <div class="text-xs text-gray-400">{{ syncStats.withEducation.toLocaleString() }} / {{ syncStats.total.toLocaleString() }}</div>
+            </div>
+            
+            <!-- With Custom Questions -->
+            <div class="text-center p-4 rounded-lg" :class="syncStats.withCustomQuestionsPct >= 80 ? 'bg-green-50' : 'bg-yellow-50'">
+              <div class="text-2xl font-bold" :class="syncStats.withCustomQuestionsPct >= 80 ? 'text-green-600' : 'text-yellow-600'">{{ syncStats.withCustomQuestionsPct }}%</div>
+              <div class="text-sm text-gray-600 mt-1">Preguntas Custom</div>
+              <div class="text-xs text-gray-400">{{ syncStats.withCustomQuestions.toLocaleString() }} / {{ syncStats.total.toLocaleString() }}</div>
+            </div>
+            
+            <!-- Processing Completed -->
+            <div class="text-center p-4 rounded-lg" :class="syncStats.processingCompletedPct >= 80 ? 'bg-green-50' : 'bg-yellow-50'">
+              <div class="text-2xl font-bold" :class="syncStats.processingCompletedPct >= 80 ? 'text-green-600' : 'text-yellow-600'">{{ syncStats.processingCompletedPct }}%</div>
+              <div class="text-sm text-gray-600 mt-1">Procesado</div>
+              <div class="text-xs text-gray-400">{{ syncStats.processingCompleted.toLocaleString() }} / {{ syncStats.total.toLocaleString() }}</div>
+            </div>
+            
+            <!-- Pending -->
+            <div class="text-center p-4 rounded-lg bg-orange-50">
+              <div class="text-2xl font-bold text-orange-600">{{ syncStats.pendingEducation }}</div>
+              <div class="text-sm text-gray-600 mt-1">Pendiente Educación</div>
+              <div class="text-xs text-gray-400">CVs sin procesar</div>
+            </div>
+          </div>
         </div>
       </div>
 

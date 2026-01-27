@@ -42,8 +42,51 @@ module App
           totalApplications: Application.count,
           totalJobs: JobPosting.published.count,
           thisWeekApplications: Application.where("created_at >= ?", 1.week.ago).count
-        }
+        },
+        syncStats: build_sync_stats
       }
+    end
+
+    def build_sync_stats
+      total = Application.count
+      return empty_sync_stats if total.zero?
+
+      from_teamtailor = Application.where.not(teamtailor_id: nil).count
+      with_cv = Application.joins(:cv_attachment).count
+      with_education = Application.where.not(education: nil).count
+      with_custom_questions = Application.where.not(teamtailor_full_sync_at: nil).count
+      processing_completed = Application.where.not(processing_completed_at: nil).count
+
+      {
+        total: total,
+        fromTeamtailor: from_teamtailor,
+        fromTeamtailorPct: percentage(from_teamtailor, total),
+        withCv: with_cv,
+        withCvPct: percentage(with_cv, total),
+        withEducation: with_education,
+        withEducationPct: percentage(with_education, total),
+        withCustomQuestions: with_custom_questions,
+        withCustomQuestionsPct: percentage(with_custom_questions, total),
+        processingCompleted: processing_completed,
+        processingCompletedPct: percentage(processing_completed, total),
+        pendingEducation: with_cv - with_education,
+        pendingSync: from_teamtailor - with_custom_questions
+      }
+    end
+
+    def empty_sync_stats
+      {
+        total: 0, fromTeamtailor: 0, fromTeamtailorPct: 0,
+        withCv: 0, withCvPct: 0, withEducation: 0, withEducationPct: 0,
+        withCustomQuestions: 0, withCustomQuestionsPct: 0,
+        processingCompleted: 0, processingCompletedPct: 0,
+        pendingEducation: 0, pendingSync: 0
+      }
+    end
+
+    def percentage(count, total)
+      return 0 if total.zero?
+      ((count.to_f / total) * 100).round(1)
     end
 
     private
