@@ -8,6 +8,7 @@ const props = defineProps({
   applications: Array,
   jobs: Array,
   canonicalStages: Array,
+  insightOptions: Array,
   filters: Object,
   currentUser: Object
 })
@@ -15,12 +16,14 @@ const props = defineProps({
 const searchQuery = ref(props.filters.query || '')
 const selectedJob = ref(props.filters.jobId || '')
 const selectedStage = ref(props.filters.canonicalStage || '')
+const selectedInsight = ref(props.filters.insight || '')
 
 function applyFilters() {
   router.get('/app/applications', {
     q: searchQuery.value || undefined,
     job_id: selectedJob.value || undefined,
-    canonical_stage: selectedStage.value || undefined
+    canonical_stage: selectedStage.value || undefined,
+    insight: selectedInsight.value || undefined
   }, {
     preserveState: true,
     preserveScroll: true
@@ -31,6 +34,7 @@ function clearFilters() {
   searchQuery.value = ''
   selectedJob.value = ''
   selectedStage.value = ''
+  selectedInsight.value = ''
   router.get('/app/applications')
 }
 
@@ -92,6 +96,14 @@ function getInitials(name) {
               <option value="">All Stages</option>
               <option v-for="stage in canonicalStages" :key="stage.value" :value="stage.value">
                 {{ stage.label }} ({{ stage.count }})
+              </option>
+            </UiSelect>
+          </div>
+          <div class="w-56">
+            <UiSelect v-model="selectedInsight" label="Insight" @change="applyFilters">
+              <option value="">All Insights</option>
+              <option v-for="opt in insightOptions" :key="opt.value" :value="opt.value">
+                {{ opt.label }} ({{ opt.count }})
               </option>
             </UiSelect>
           </div>
