@@ -120,6 +120,7 @@ module App
         },
         stage: app.current_stage ? { id: app.current_stage.id, name: app.current_stage.name, kind: app.current_stage.kind } : nil,
         source: app.source,
+        university: app.education&.dig("university", "name"),
         createdAt: app.created_at.iso8601
       }
     end

@@ -107,8 +107,8 @@ function clearFilters() {
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidate</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">University</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stage</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
             </tr>
           </thead>
@@ -125,6 +125,10 @@ function clearFilters() {
                   {{ app.job.title }}
                 </Link>
               </td>
+              <td class="px-6 py-4 text-sm text-gray-600">
+                <span v-if="app.university">{{ app.university }}</span>
+                <span v-else class="text-gray-400">—</span>
+              </td>
               <td class="px-6 py-4">
                 <span 
                   v-if="app.stage"
@@ -138,7 +142,6 @@ function clearFilters() {
                   {{ app.stage.name }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-500">{{ app.source || '—' }}</td>
               <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(app.createdAt) }}</td>
             </tr>
             <tr v-if="applications.length === 0">
