@@ -121,6 +121,9 @@ module App
           kind: app.current_stage.kind,
           canonical: app.current_stage.canonical_stage
         } : nil,
+        hasStartupExperience: app.has_startup_experience,
+        hasYearTenure: app.has_year_tenure,
+        hasPersonalProjects: app.has_personal_projects,
         createdAt: app.created_at.iso8601
       }
     end
