@@ -27,7 +27,7 @@ production:
     schedule: every 5 minutes
   education_extraction:
     command: "EducationExtractionJob.perform_later"
-    schedule: every 3 minutes
+    schedule: every 1 minute
   cv_backfill:
     command: "CvBackfillJob.perform_later"
-    schedule: every 5 minutes
+    schedule: every 1 minute

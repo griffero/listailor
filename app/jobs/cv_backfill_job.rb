@@ -2,8 +2,8 @@ class CvBackfillJob < ApplicationJob
   queue_as :default
 
   LOCK_KEY = "cv_backfill"
-  LOCK_TTL = 15.minutes
-  BATCH_SIZE = 30
+  LOCK_TTL = 30.minutes
+  BATCH_SIZE = 200
 
   def perform
     return unless acquire_lock

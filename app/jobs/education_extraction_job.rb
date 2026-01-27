@@ -2,8 +2,8 @@ class EducationExtractionJob < ApplicationJob
   queue_as :default
 
   LOCK_KEY = "education_extraction"
-  LOCK_TTL = 10.minutes
-  BATCH_SIZE = 20
+  LOCK_TTL = 30.minutes
+  BATCH_SIZE = 100
 
   def perform
     return unless acquire_lock
