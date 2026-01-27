@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_26_184105) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_27_185203) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -98,6 +98,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_26_184105) do
     t.datetime "teamtailor_full_sync_at"
     t.jsonb "education"
     t.datetime "processing_completed_at"
+    t.jsonb "work_experience"
     t.index ["candidate_id"], name: "index_applications_on_candidate_id"
     t.index ["current_stage_id"], name: "index_applications_on_current_stage_id"
     t.index ["job_posting_id", "candidate_id"], name: "index_applications_on_job_posting_id_and_candidate_id", unique: true

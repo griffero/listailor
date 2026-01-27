@@ -54,21 +54,22 @@ class EducationExtractionJob < ApplicationJob
         return
       end
 
-      # Extract education using AI
-      education = EducationExtractor.extract(cv_text)
+      # Extract education AND work experience using AI
+      extracted = CvExtractor.extract(cv_text)
 
       # Save results
       app.update!(
-        education: education,
+        education: extracted[:education],
+        work_experience: extracted[:work_experience],
         processing_completed_at: Time.current
       )
 
-      Rails.logger.info("EducationExtractionJob: Successfully extracted education for app #{app.id}")
+      Rails.logger.info("EducationExtractionJob: Successfully extracted data for app #{app.id} (#{extracted[:work_experience]&.size || 0} jobs)")
     rescue PdfTextExtractor::ExtractionError => e
       Rails.logger.error("EducationExtractionJob: PDF extraction failed for app #{app.id}: #{e.message}")
       # Mark as completed to not block indefinitely
       app.update!(processing_completed_at: Time.current)
-    rescue EducationExtractor::ExtractionError => e
+    rescue CvExtractor::ExtractionError => e
       Rails.logger.error("EducationExtractionJob: AI extraction failed for app #{app.id}: #{e.message}")
       # Don't mark as completed - will retry on next run
     rescue StandardError => e

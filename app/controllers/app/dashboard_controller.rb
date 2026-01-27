@@ -54,6 +54,7 @@ module App
       from_teamtailor = Application.where.not(teamtailor_id: nil).count
       with_cv = Application.joins(:cv_attachment).count
       with_education = Application.where.not(education: nil).count
+      with_work_experience = Application.where("work_experience IS NOT NULL AND work_experience != '[]'::jsonb").count
       with_custom_questions = Application.where.not(teamtailor_full_sync_at: nil).count
       processing_completed = Application.where.not(processing_completed_at: nil).count
 
@@ -65,11 +66,13 @@ module App
         withCvPct: percentage(with_cv, total),
         withEducation: with_education,
         withEducationPct: percentage(with_education, total),
+        withWorkExperience: with_work_experience,
+        withWorkExperiencePct: percentage(with_work_experience, total),
         withCustomQuestions: with_custom_questions,
         withCustomQuestionsPct: percentage(with_custom_questions, total),
         processingCompleted: processing_completed,
         processingCompletedPct: percentage(processing_completed, total),
-        pendingEducation: with_cv - with_education,
+        pendingExtraction: with_cv - processing_completed,
         pendingSync: from_teamtailor - with_custom_questions
       }
     end
@@ -78,9 +81,10 @@ module App
       {
         total: 0, fromTeamtailor: 0, fromTeamtailorPct: 0,
         withCv: 0, withCvPct: 0, withEducation: 0, withEducationPct: 0,
+        withWorkExperience: 0, withWorkExperiencePct: 0,
         withCustomQuestions: 0, withCustomQuestionsPct: 0,
         processingCompleted: 0, processingCompletedPct: 0,
-        pendingEducation: 0, pendingSync: 0
+        pendingExtraction: 0, pendingSync: 0
       }
     end
 

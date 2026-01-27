@@ -131,6 +131,7 @@ module App
         utmCampaign: app.utm_campaign,
         cvUrl: app.cv.attached? ? rails_blob_path(app.cv) : nil,
         education: app.education,
+        workExperience: app.work_experience,
         processingCompleted: app.processing_completed_at.present?,
         answers: app.application_answers.ordered.map do |answer|
           {

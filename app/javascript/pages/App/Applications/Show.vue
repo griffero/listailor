@@ -69,6 +69,21 @@ function answerLink(value) {
   if (/^www\./i.test(trimmed)) return `https://${trimmed}`
   return null
 }
+
+function formatWorkDate(dateStr) {
+  if (!dateStr) return ''
+  // Handle YYYY-MM format
+  if (/^\d{4}-\d{2}$/.test(dateStr)) {
+    const [year, month] = dateStr.split('-')
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    return `${monthNames[parseInt(month) - 1]} ${year}`
+  }
+  // Handle YYYY format
+  if (/^\d{4}$/.test(dateStr)) {
+    return dateStr
+  }
+  return dateStr
+}
 </script>
 
 <template>
@@ -272,7 +287,7 @@ function answerLink(value) {
             
             <!-- Loading state -->
             <div v-if="application.cvUrl && !application.processingCompleted && !application.education" class="text-sm text-gray-500 italic">
-              Extracting education from CV...
+              Extracting from CV...
             </div>
             
             <!-- Education content -->
@@ -297,8 +312,34 @@ function answerLink(value) {
               
               <!-- No education found -->
               <div v-if="!application.education.university && !application.education.school" class="text-gray-500 italic">
-                No education information found in CV
+                No education found
               </div>
+            </div>
+          </div>
+
+          <!-- Work Experience -->
+          <div v-if="application.workExperience?.length > 0 || (application.cvUrl && !application.processingCompleted)" class="bg-white rounded-lg shadow p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Work Experience</h3>
+            
+            <!-- Loading state -->
+            <div v-if="application.cvUrl && !application.processingCompleted && !application.workExperience?.length" class="text-sm text-gray-500 italic">
+              Extracting from CV...
+            </div>
+            
+            <!-- Work experience content -->
+            <div v-else-if="application.workExperience?.length > 0" class="space-y-4 text-sm">
+              <div v-for="(job, index) in application.workExperience" :key="index" class="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                <div class="font-medium text-gray-900">{{ job.company_normalized || job.company }}</div>
+                <div v-if="job.position" class="text-gray-600">{{ job.position }}</div>
+                <div class="text-gray-500 text-xs mt-1">
+                  {{ formatWorkDate(job.start_date) }} - {{ job.is_current ? 'Present' : formatWorkDate(job.end_date) }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- No work experience -->
+            <div v-else class="text-gray-500 italic text-sm">
+              No work experience found
             </div>
           </div>
 
