@@ -57,6 +57,9 @@ module App
       with_work_experience = Application.where("work_experience IS NOT NULL AND jsonb_array_length(work_experience) > 0").count
       with_custom_questions = Application.where.not(teamtailor_full_sync_at: nil).count
       processing_completed = Application.where.not(processing_completed_at: nil).count
+      with_cover_letter_eval = Application.where.not(cover_letter_decision: nil).count
+      cover_letter_advance = Application.where(cover_letter_decision: "advance").count
+      cover_letter_reject = Application.where(cover_letter_decision: "reject").count
 
       {
         total: total,
@@ -72,6 +75,10 @@ module App
         withCustomQuestionsPct: percentage(with_custom_questions, total),
         processingCompleted: processing_completed,
         processingCompletedPct: percentage(processing_completed, total),
+        withCoverLetterEval: with_cover_letter_eval,
+        withCoverLetterEvalPct: percentage(with_cover_letter_eval, total),
+        coverLetterAdvance: cover_letter_advance,
+        coverLetterReject: cover_letter_reject,
         pendingExtraction: with_cv - processing_completed,
         pendingSync: from_teamtailor - with_custom_questions
       }
@@ -84,6 +91,8 @@ module App
         withWorkExperience: 0, withWorkExperiencePct: 0,
         withCustomQuestions: 0, withCustomQuestionsPct: 0,
         processingCompleted: 0, processingCompletedPct: 0,
+        withCoverLetterEval: 0, withCoverLetterEvalPct: 0,
+        coverLetterAdvance: 0, coverLetterReject: 0,
         pendingExtraction: 0, pendingSync: 0
       }
     end

@@ -158,6 +158,12 @@ function getInitials(name) {
               :variant="getSyncVariant(syncStats.processingCompletedPct)"
             />
             <UiStatCard 
+              label="Cover Letter" 
+              :value="`${syncStats.withCoverLetterEvalPct || 0}%`"
+              :subtext="`✓${syncStats.coverLetterAdvance || 0} / ✗${syncStats.coverLetterReject || 0}`"
+              :variant="getSyncVariant(syncStats.withCoverLetterEvalPct || 0)"
+            />
+            <UiStatCard 
               label="Pendiente" 
               :value="formatNumber(syncStats.pendingExtraction || 0)"
               subtext="CVs sin extraer"
