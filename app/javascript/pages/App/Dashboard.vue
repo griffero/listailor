@@ -1,7 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { UiCard, UiStatCard, UiPageHeader, UiBadge, UiButton } from '@/components/ui'
+import { UiCard, UiStatCard, UiPageHeader, UiBadge, UiButton, UiTable } from '@/components/ui'
 
 defineProps({
   recentApplications: Array,
@@ -14,7 +14,8 @@ defineProps({
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', {
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
+    year: 'numeric'
   })
 }
 
@@ -26,6 +27,10 @@ function getSyncVariant(pct) {
   if (pct >= 80) return 'success'
   if (pct >= 50) return 'warning'
   return 'danger'
+}
+
+function getInitials(name) {
+  return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 }
 </script>
 
@@ -202,38 +207,50 @@ function getSyncVariant(pct) {
       </UiCard>
 
       <!-- Recent Applications -->
-      <UiCard padding="none">
-        <div class="px-6 py-4 border-b border-zinc-100">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base font-semibold text-zinc-900">Recent Applications</h2>
-            <UiButton href="/app/applications" variant="ghost" size="sm">
-              View All
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </UiButton>
-          </div>
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-semibold text-zinc-900">Recent Applications</h2>
+          <UiButton href="/app/applications" variant="ghost" size="sm">
+            View All
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </UiButton>
         </div>
-        <div class="divide-y divide-zinc-100">
-          <Link 
-            v-for="app in recentApplications" 
-            :key="app.id"
-            :href="`/app/applications/${app.id}`"
-            class="flex items-center justify-between px-6 py-4 hover:bg-zinc-50 transition-colors"
-          >
-            <div class="flex items-center gap-4">
-              <div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center">
-                <span class="text-sm font-medium text-zinc-600">
-                  {{ app.candidate.name.split(' ').map(n => n[0]).join('').slice(0, 2) }}
-                </span>
-              </div>
-              <div>
-                <div class="font-medium text-zinc-900">{{ app.candidate.name }}</div>
-                <div class="text-sm text-zinc-500">{{ app.job.title }}</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <!-- Insights -->
+        <UiTable>
+          <template #header>
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Candidate</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Job</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">University</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Insights</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Stage</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Date</th>
+            </tr>
+          </template>
+          
+          <tr v-for="app in recentApplications" :key="app.id" class="group">
+            <td class="px-6 py-4">
+              <Link :href="`/app/applications/${app.id}`" class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-zinc-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-zinc-200 transition-colors">
+                  <span class="text-xs font-medium text-zinc-600">{{ getInitials(app.candidate.name) }}</span>
+                </div>
+                <div>
+                  <div class="font-medium text-zinc-900 group-hover:text-zinc-600 transition-colors">{{ app.candidate.name }}</div>
+                  <div class="text-sm text-zinc-500 font-mono">{{ app.candidate.email }}</div>
+                </div>
+              </Link>
+            </td>
+            <td class="px-6 py-4">
+              <Link :href="`/app/jobs/${app.job.id}`" class="text-sm text-zinc-600 hover:text-zinc-900 transition-colors">
+                {{ app.job.title }}
+              </Link>
+            </td>
+            <td class="px-6 py-4">
+              <span v-if="app.university" class="text-sm text-zinc-600">{{ app.university }}</span>
+              <span v-else class="text-sm text-zinc-300">—</span>
+            </td>
+            <td class="px-6 py-4">
               <div class="flex items-center gap-1">
                 <span 
                   v-if="app.hasStartupExperience" 
@@ -262,26 +279,33 @@ function getSyncVariant(pct) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </span>
+                <span v-if="!app.hasStartupExperience && !app.hasYearTenure && !app.hasPersonalProjects" class="text-zinc-300">—</span>
               </div>
+            </td>
+            <td class="px-6 py-4">
               <UiBadge 
                 v-if="app.stage"
                 :variant="app.stage.kind === 'hired' ? 'success' : app.stage.kind === 'rejected' ? 'danger' : 'default'"
+                size="sm"
               >
                 {{ app.stage.name }}
               </UiBadge>
-              <span class="text-sm text-zinc-400 font-mono">{{ formatDate(app.createdAt) }}</span>
-            </div>
-          </Link>
-          <div v-if="recentApplications.length === 0" class="px-6 py-12 text-center">
-            <div class="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-              </svg>
-            </div>
-            <p class="text-sm text-zinc-500">No applications yet</p>
-          </div>
-        </div>
-      </UiCard>
+            </td>
+            <td class="px-6 py-4 text-sm text-zinc-500 font-mono">{{ formatDate(app.createdAt) }}</td>
+          </tr>
+          
+          <tr v-if="recentApplications.length === 0">
+            <td colspan="6" class="px-6 py-12 text-center">
+              <div class="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+              </div>
+              <p class="text-sm text-zinc-500">No applications yet</p>
+            </td>
+          </tr>
+        </UiTable>
+      </div>
     </div>
   </AppLayout>
 </template>
