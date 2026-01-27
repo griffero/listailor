@@ -175,27 +175,27 @@ function getSyncVariant(pct) {
             </UiButton>
           </div>
         </div>
-        <div class="p-6">
-          <div class="flex gap-3 overflow-x-auto pb-2">
+        <div class="p-6 overflow-x-auto">
+          <div class="grid grid-cols-5 lg:grid-cols-10 gap-2 min-w-[600px]">
             <div 
               v-for="stage in canonicalStages" 
               :key="stage.canonical"
               :class="[
-                'flex-shrink-0 w-28 p-4 rounded-xl text-center transition-all',
+                'p-3 rounded-lg text-center transition-all',
                 stage.kind === 'hired' ? 'bg-emerald-50 ring-1 ring-emerald-200' :
                 stage.kind === 'rejected' ? 'bg-red-50 ring-1 ring-red-200' :
                 'bg-zinc-50 ring-1 ring-zinc-200'
               ]"
             >
               <div :class="[
-                'text-2xl font-bold font-mono',
+                'text-xl font-bold font-mono',
                 stage.kind === 'hired' ? 'text-emerald-600' :
                 stage.kind === 'rejected' ? 'text-red-600' :
                 'text-zinc-900'
               ]">
                 {{ stage.count }}
               </div>
-              <div class="text-xs text-zinc-600 mt-1 truncate">{{ stage.name }}</div>
+              <div class="text-xs text-zinc-600 mt-1 truncate" :title="stage.name">{{ stage.name }}</div>
             </div>
           </div>
         </div>
