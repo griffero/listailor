@@ -175,7 +175,7 @@ function updateUserRole(userId, role) {
               <select 
                 v-if="currentUser?.canWrite && member.email !== currentUser?.email"
                 :value="member.role"
-                @change="updateUserRole(member.id, ($event.target as HTMLSelectElement).value)"
+                @change="updateUserRole(member.id, $event.target.value)"
                 class="text-xs px-2 py-1 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
               >
                 <option value="viewer">Viewer</option>
