@@ -11,7 +11,7 @@ module App
       @applications = @applications.for_job(params[:job_id]) if params[:job_id].present?
       @applications = @applications.for_canonical_stage(params[:canonical_stage]) if params[:canonical_stage].present?
       @applications = @applications.search(params[:q]) if params[:q].present?
-      @applications = filter_by_insight(@applications, params[:insight]) if params[:insight].present?
+      @applications = filter_by_insights(@applications, params[:insights]) if params[:insights].present?
 
       @applications = @applications.page(params[:page]).per(25) if @applications.respond_to?(:page)
 
@@ -24,7 +24,7 @@ module App
           jobId: params[:job_id],
           canonicalStage: params[:canonical_stage],
           query: params[:q],
-          insight: params[:insight]
+          insights: Array(params[:insights])
         }
       }
     end
@@ -221,26 +221,32 @@ module App
       end.select { |s| s[:count] > 0 }
     end
 
-    def filter_by_insight(scope, insight)
-      case insight
-      when "startup"
-        scope.where(has_startup_experience: true)
-      when "tenure"
-        scope.where(has_year_tenure: true)
-      when "projects"
-        scope.where(has_personal_projects: true)
-      when "cl_advance"
-        scope.where(cover_letter_decision: "advance")
-      when "cl_reject"
-        scope.where(cover_letter_decision: "reject")
-      when "no_insights"
-        scope.where(has_startup_experience: [nil, false])
-             .where(has_year_tenure: [nil, false])
-             .where(has_personal_projects: [nil, false])
-             .where(cover_letter_decision: [nil, ""])
-      else
-        scope
+    def filter_by_insights(scope, insights)
+      insights = Array(insights)
+      return scope if insights.empty?
+
+      # Build conditions for each selected insight (OR logic between insights)
+      conditions = []
+      
+      insights.each do |insight|
+        case insight
+        when "startup"
+          conditions << "has_startup_experience = true"
+        when "tenure"
+          conditions << "has_year_tenure = true"
+        when "projects"
+          conditions << "has_personal_projects = true"
+        when "cl_advance"
+          conditions << "cover_letter_decision = 'advance'"
+        when "cl_reject"
+          conditions << "cover_letter_decision = 'reject'"
+        end
       end
+
+      return scope if conditions.empty?
+      
+      # Use OR to match any of the selected insights
+      scope.where(conditions.join(" OR "))
     end
 
     def insight_filter_options

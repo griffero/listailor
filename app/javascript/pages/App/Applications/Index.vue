@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { UiCard, UiPageHeader, UiBadge, UiButton, UiInput, UiSelect, UiTable, UiEmptyState } from '@/components/ui'
+import { UiCard, UiPageHeader, UiBadge, UiButton, UiInput, UiSelect, UiMultiSelect, UiTable, UiEmptyState } from '@/components/ui'
 
 const props = defineProps({
   applications: Array,
@@ -16,14 +16,14 @@ const props = defineProps({
 const searchQuery = ref(props.filters.query || '')
 const selectedJob = ref(props.filters.jobId || '')
 const selectedStage = ref(props.filters.canonicalStage || '')
-const selectedInsight = ref(props.filters.insight || '')
+const selectedInsights = ref(props.filters.insights || [])
 
 function applyFilters() {
   router.get('/app/applications', {
     q: searchQuery.value || undefined,
     job_id: selectedJob.value || undefined,
     canonical_stage: selectedStage.value || undefined,
-    insight: selectedInsight.value || undefined
+    insights: selectedInsights.value.length > 0 ? selectedInsights.value : undefined
   }, {
     preserveState: true,
     preserveScroll: true
@@ -34,7 +34,7 @@ function clearFilters() {
   searchQuery.value = ''
   selectedJob.value = ''
   selectedStage.value = ''
-  selectedInsight.value = ''
+  selectedInsights.value = []
   router.get('/app/applications')
 }
 
@@ -100,12 +100,13 @@ function getInitials(name) {
             </UiSelect>
           </div>
           <div class="w-56">
-            <UiSelect v-model="selectedInsight" label="Insight" @change="applyFilters">
-              <option value="">All Insights</option>
-              <option v-for="opt in insightOptions" :key="opt.value" :value="opt.value">
-                {{ opt.label }} ({{ opt.count }})
-              </option>
-            </UiSelect>
+            <UiMultiSelect 
+              v-model="selectedInsights" 
+              :options="insightOptions"
+              label="Insights"
+              placeholder="All Insights"
+              @change="applyFilters"
+            />
           </div>
           <div class="flex gap-2">
             <UiButton @click="applyFilters">Search</UiButton>
