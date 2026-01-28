@@ -1,7 +1,7 @@
 module App
   class ApplicationsController < BaseController
-    before_action :set_application, only: [:show, :move_stage, :toggle_stage_completion]
-    before_action :require_write_permission!, only: [:new, :create, :move_stage, :toggle_stage_completion]
+    before_action :set_application, only: [:show, :move_stage, :toggle_stage_completion, :re_evaluate]
+    before_action :require_write_permission!, only: [:new, :create, :move_stage, :toggle_stage_completion, :re_evaluate]
 
     def index
       @applications = Application.includes(:candidate, :job_posting, :current_stage)
@@ -104,6 +104,43 @@ module App
         format.html { redirect_to app_application_path(@application) }
         format.json { render json: { completed: completed, stageId: stage.id } }
       end
+    end
+
+    def re_evaluate
+      # Get all application answers
+      answers = @application.application_answers.includes(:global_question).ordered
+      
+      if answers.empty?
+        redirect_to app_application_path(@application), alert: "No answers to evaluate"
+        return
+      end
+
+      # Format all answers for evaluation
+      answers_text = answers.map do |answer|
+        next if answer.value.blank?
+        "**#{answer.question_label}**\n#{answer.value}"
+      end.compact.join("\n\n")
+
+      if answers_text.blank?
+        redirect_to app_application_path(@application), alert: "No answers to evaluate"
+        return
+      end
+
+      # Evaluate using AI
+      result = CoverLetterEvaluator.new(answers_text).evaluate
+
+      if result
+        @application.update!(
+          cover_letter_evaluation: result,
+          cover_letter_decision: result[:decision]
+        )
+        redirect_to app_application_path(@application), notice: "AI evaluation completed"
+      else
+        redirect_to app_application_path(@application), alert: "AI evaluation failed"
+      end
+    rescue StandardError => e
+      Rails.logger.error("Re-evaluation failed for app #{@application.id}: #{e.message}")
+      redirect_to app_application_path(@application), alert: "AI evaluation failed: #{e.message}"
     end
 
     private

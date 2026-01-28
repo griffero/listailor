@@ -57,6 +57,7 @@ Rails.application.routes.draw do
       member do
         post :move_stage
         post :toggle_stage_completion
+        post :re_evaluate
       end
       resources :notes, only: [:create], controller: "application_notes"
       resources :emails, only: [:new, :create], controller: "application_emails"
