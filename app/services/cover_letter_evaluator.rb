@@ -21,8 +21,15 @@ class CoverLetterEvaluator
     End with a binary decision: ADVANCE or REJECT.
   PROMPT
 
-  def initialize(application_answers_text)
+  # Model selection based on recency
+  MODELS = {
+    recent: "gpt-5.2",      # Last 3 months - best quality
+    older: "gpt-5-mini"     # Older than 3 months - good & cheaper
+  }.freeze
+
+  def initialize(application_answers_text, model: nil, application_date: nil)
     @application_answers_text = application_answers_text
+    @model = model || select_model_for_date(application_date)
   end
 
   def evaluate
@@ -32,12 +39,12 @@ class CoverLetterEvaluator
 
     client = OpenAI::Client.new(
       access_token: ENV["OPENAI_API_KEY"],
-      request_timeout: 60
+      request_timeout: 120
     )
 
     response = client.chat(
       parameters: {
-        model: "gpt-4o-mini",
+        model: @model,
         messages: [
           { role: "system", content: prompt },
           { role: "user", content: "APPLICATION ANSWERS:\n\n#{@application_answers_text}" }
@@ -49,11 +56,14 @@ class CoverLetterEvaluator
     content = response.dig("choices", 0, "message", "content")
     return nil if content.blank?
 
+    Rails.logger.info("CoverLetterEvaluator: Used model #{@model}")
+
     decision = extract_decision(content)
 
     {
       evaluation: content,
       decision: decision,
+      model: @model,
       evaluated_at: Time.current.iso8601
     }
   rescue StandardError => e
@@ -62,6 +72,16 @@ class CoverLetterEvaluator
   end
 
   private
+
+  def select_model_for_date(date)
+    return MODELS[:recent] if date.nil?
+    
+    if date > 3.months.ago
+      MODELS[:recent]  # gpt-5.2 for recent applications
+    else
+      MODELS[:older]   # gpt-5-mini for older applications
+    end
+  end
 
   def extract_decision(content)
     # Look for explicit decision patterns first

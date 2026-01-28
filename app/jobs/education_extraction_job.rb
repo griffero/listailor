@@ -136,7 +136,8 @@ class EducationExtractionJob < ApplicationJob
     return nil if answers_text.blank?
 
     # Evaluate using AI with all answers
-    CoverLetterEvaluator.new(answers_text).evaluate
+    # Model selection: gpt-5.2 for recent (< 3 months), gpt-5-mini for older
+    CoverLetterEvaluator.new(answers_text, application_date: app.created_at).evaluate
   rescue StandardError => e
     Rails.logger.warn("EducationExtractionJob: Cover letter evaluation failed for app #{app.id}: #{e.message}")
     nil
