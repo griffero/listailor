@@ -414,7 +414,7 @@ function getInitials(name) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </span>
-                <span class="text-zinc-700">Experiencia en startups</span>
+                <span class="text-zinc-700">Top Startup LATAM/USA/EU</span>
               </div>
               <div v-if="application.hasYearTenure" class="flex items-center gap-2 text-sm">
                 <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100 text-emerald-600">
@@ -422,7 +422,7 @@ function getInitials(name) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </span>
-                <span class="text-zinc-700">+1 año en algún rol</span>
+                <span class="text-zinc-700">+2 años en algún rol</span>
               </div>
               <div v-if="application.hasPersonalProjects" class="flex items-center gap-2 text-sm">
                 <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-amber-100 text-amber-600">

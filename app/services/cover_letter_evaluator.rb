@@ -15,7 +15,7 @@ class CoverLetterEvaluator
     4. What is the biggest red flag that suggests conformity or shallow thinking?
     5. If this person were wrong, how would they most likely be wrong?
 
-    Assume you have 200 candidates with stronger credentials.
+    Assume you have 10 candidates with stronger credentials.
     Be intellectually ruthless.
 
     End with a binary decision: ADVANCE or REJECT.

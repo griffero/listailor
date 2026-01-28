@@ -158,7 +158,7 @@ function getInitials(name) {
               <span 
                 v-if="app.hasStartupExperience" 
                 class="group/startup relative inline-flex items-center justify-center w-6 h-6 rounded bg-violet-100 text-violet-600"
-                title="Experiencia en startups"
+                title="Top Startup LATAM/USA/EU"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -167,7 +167,7 @@ function getInitials(name) {
               <span 
                 v-if="app.hasYearTenure" 
                 class="group/tenure relative inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100 text-emerald-600"
-                title="+1 año en algún rol"
+                title="+2 años en algún rol"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

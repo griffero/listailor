@@ -21,8 +21,8 @@ class CvExtractor
     5. Si es el trabajo actual, pon end_date como null
 
     Reglas para INSIGHTS:
-    1. has_startup_experience: true si ha trabajado en startups, scale-ups, o empresas pequeñas de tecnología (ej: Rappi, Cornershop, Notion, empresas con "seed", "Series A/B/C", YC, etc). También si menciona "startup" o trabajó en empresa fundada recientemente.
-    2. has_year_tenure: true si ALGUNO de sus trabajos duró 1 año o más (basado en las fechas)
+    1. has_startup_experience: true SOLO si ha trabajado en startups TOP reconocidas de LATAM, USA o Europa. Ejemplos válidos: Rappi, Cornershop, NotCo, Kavak, Nubank, Clip, Bitso, Platzi, Loft, QuintoAndar, Mercado Libre (early), Stripe, Notion, Figma, Airbnb (early), Uber (early), empresas Y Combinator conocidas, Sequoia portfolio, a]6z portfolio. NO contar cualquier empresa pequeña o desconocida como "startup top".
+    2. has_year_tenure: true si ALGUNO de sus trabajos duró 2 años o más (basado en las fechas)
     3. has_personal_projects: true si menciona proyectos personales, side projects, freelance significativo, fue fundador/co-fundador de algo, tiene portfolio, o contribuciones open source.
 
     Responde SOLO con JSON válido, sin texto adicional.
@@ -223,9 +223,9 @@ class CvExtractor
                  end
       next false unless end_date
 
-      # Check if duration is >= 12 months
+      # Check if duration is >= 24 months (2 years)
       months = ((end_date.year - start_date.year) * 12) + (end_date.month - start_date.month)
-      months >= 12
+      months >= 24
     end
   end
 

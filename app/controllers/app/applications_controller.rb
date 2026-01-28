@@ -288,8 +288,8 @@ module App
 
     def insight_filter_options
       [
-        { value: "startup", label: "🚀 Startup Experience", count: Application.where(has_startup_experience: true).count },
-        { value: "tenure", label: "⏱️ +1 Year Tenure", count: Application.where(has_year_tenure: true).count },
+        { value: "startup", label: "🚀 Top Startup", count: Application.where(has_startup_experience: true).count },
+        { value: "tenure", label: "⏱️ +2 Years Tenure", count: Application.where(has_year_tenure: true).count },
         { value: "projects", label: "💡 Personal Projects", count: Application.where(has_personal_projects: true).count },
         { value: "cl_advance", label: "✅ Cover Letter: Advance", count: Application.where(cover_letter_decision: "advance").count },
         { value: "cl_reject", label: "❌ Cover Letter: Reject", count: Application.where(cover_letter_decision: "reject").count }
